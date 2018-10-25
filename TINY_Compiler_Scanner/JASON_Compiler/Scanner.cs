@@ -83,7 +83,7 @@ namespace JASON_Compiler
                 if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
                     continue;
 
-                if (CurrentChar >= 'A' && CurrentChar <= 'z') //if you read a character
+                if ((CurrentChar >= 'A' && CurrentChar <= 'Z') || (CurrentChar >= 'a' && CurrentChar <= 'z')) //if you read a character
                 {
                     j++;
                     if (j == SourceCode.Length)
@@ -95,7 +95,7 @@ namespace JASON_Compiler
                     else
                     {
                         CurrentChar = SourceCode[j];
-                        while ((CurrentChar >= 'A' && CurrentChar <= 'z') || (CurrentChar >= '0' && CurrentChar <= '9') || CurrentChar == '_')
+                        while ((CurrentChar >= 'A' && CurrentChar <= 'Z') || (CurrentChar >= 'a' && CurrentChar <= 'z') || (CurrentChar >= '0' && CurrentChar <= '9') || CurrentChar == '_')
                         {
                             CurrentLexeme += CurrentChar;
                             j++;
@@ -248,13 +248,12 @@ namespace JASON_Compiler
 
         void FindTokenClass(string Lex)
         {
-            Token_Class TC;
             Token Tok = new Token();
             Tok.lex = Lex;
             //Is it a reserved word?
             
             //Is it an identifier?
-            if (Lex[0] >= 'A' && Lex[0] <= 'z')
+            if ((Lex[0] >= 'A' && Lex[0] <= 'Z') || (Lex[0] >= 'a' && Lex[0] <= 'z'))
             {
                 if (ReservedWords.ContainsKey(Lex))
                 {

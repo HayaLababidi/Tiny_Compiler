@@ -71,3 +71,13 @@ D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\TINY_Compiler_Scanner\JASON
 D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
 D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe
 D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.pdb
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe.config
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.exe
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.pdb
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.pdb
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csprojResolveAssemblyReference.cache
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Form1.resources
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Form2.resources
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Properties.Resources.resources
+D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
