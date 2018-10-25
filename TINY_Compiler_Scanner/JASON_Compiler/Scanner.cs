@@ -10,7 +10,7 @@ public enum Token_Class
     Int, Float, String, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, LCurlyBraces, RCurlyBraces, OrOp,
     AndOp, AssignmentOp, NotEqual, IsEqual, LessThanOp, GreaterThanOp, PlusOp, MinusOp, MultiplyOp,
-    DivideOp, Constant, Identifier, DoubleQuotes 
+    DivideOp, Constant, Identifier, DoubleQuotes, StringValue
 }
 namespace JASON_Compiler
 {
@@ -117,6 +117,28 @@ namespace JASON_Compiler
                     }
 
                 }
+                else if (CurrentChar == '"')
+                {
+                    j++;
+                    while (j < SourceCode.Length && SourceCode[j] != '"')
+                    {
+                        CurrentChar = SourceCode[j];
+                        CurrentLexeme += CurrentChar;
+                        j++;
+                    }
+                    if (j == SourceCode.Length)
+                    {
+                        Errors.Error_List.Add(CurrentLexeme + " End-of-file found, '\"' expected\n");
+                        end = true;
+                        break;
+                    }
+                    else
+                    {
+                        FindTokenClass(CurrentLexeme);
+                    }
+
+                    i = j;
+                }
                 //if its a number (constant)
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
                 {
@@ -126,7 +148,7 @@ namespace JASON_Compiler
                         FindTokenClass(CurrentLexeme);
                         break;
                     }
-                        
+
                     else
                     {
                         CurrentChar = SourceCode[j];
@@ -160,7 +182,7 @@ namespace JASON_Compiler
                                 // by declaring that the dot found not for a float number
                                 j--;
                                 CurrentChar = SourceCode[j];
-                                CurrentLexeme=CurrentLexeme.Remove(CurrentLexeme.Count() - 1);
+                                CurrentLexeme = CurrentLexeme.Remove(CurrentLexeme.Count() - 1);
                             }
                             else
                             {
@@ -190,14 +212,14 @@ namespace JASON_Compiler
                             currentop = "" + (char)SourceCode[j] + (char)SourceCode[j + 1];
                         }
                         else currentop = (char)SourceCode[j] + " ";
-                        if (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                        if (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
                         {
 
-                            while (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                            while (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
                             {
                                 CurrentLexeme += CurrentChar;
                                 j++;
-                                if(j == SourceCode.Length)
+                                if (j == SourceCode.Length)
                                 {
                                     //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
                                     break;
@@ -216,7 +238,7 @@ namespace JASON_Compiler
                         else //if not error add to tokens
                             FindTokenClass(CurrentLexeme);
                         i = j - 1;
-                     }
+                    }
                 }
                 else if (CurrentChar == '/')
                 {
@@ -297,10 +319,17 @@ namespace JASON_Compiler
         {
             Token Tok = new Token();
             Tok.lex = Lex;
+
+            //Is it a string?
+            if (Lex.Contains('"'))
+            {
+                Tok.token_type = Token_Class.StringValue;
+                Tok.lex = Lex.Substring(1, Lex.Count()-1);
+            }
             //Is it a reserved word?
             
             //Is it an identifier?
-            if ((Lex[0] >= 'A' && Lex[0] <= 'Z') || (Lex[0] >= 'a' && Lex[0] <= 'z'))
+            else if ((Lex[0] >= 'A' && Lex[0] <= 'Z') || (Lex[0] >= 'a' && Lex[0] <= 'z'))
             {
                 if (ReservedWords.ContainsKey(Lex))
                 {
