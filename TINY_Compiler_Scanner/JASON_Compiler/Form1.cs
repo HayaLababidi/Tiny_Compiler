@@ -21,6 +21,10 @@ namespace JASON_Compiler
         {
             textBox2.Clear();
             string Code=textBox1.Text.ToLower();
+            JASON_Compiler.Lexemes.Clear();
+            JASON_Compiler.TokenStream.Clear();
+            Errors.Error_List.Clear();
+            JASON_Compiler.Jason_Scanner.Tokens.Clear();
             JASON_Compiler.Start_Compiling(Code);
             PrintTokens();
          //   PrintLexemes();
@@ -28,7 +32,10 @@ namespace JASON_Compiler
             PrintErrors();
         }
         void PrintTokens()
-        {
+        {            
+            dataGridView1.Rows.Clear();
+            dataGridView1.Refresh();
+            MessageBox.Show(Convert.ToString(JASON_Compiler.Jason_Scanner.Tokens.Count));
             for (int i = 0; i < JASON_Compiler.Jason_Scanner.Tokens.Count; i++)
             {
                dataGridView1.Rows.Add(JASON_Compiler.Jason_Scanner.Tokens.ElementAt(i).lex, JASON_Compiler.Jason_Scanner.Tokens.ElementAt(i).token_type);
@@ -39,7 +46,8 @@ namespace JASON_Compiler
         {
             for(int i=0; i<Errors.Error_List.Count; i++)
             {
-                textBox2.Text += Errors.Error_List[i];
+                textBox2.Text +="ERROR "+Convert.ToString(i+1)+": "+ Errors.Error_List[i];
+                textBox2.AppendText(Environment.NewLine);
             }
         }
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)

@@ -17,7 +17,7 @@ namespace JASON_Compiler
         public static void Start_Compiling(string SourceCode) //character by character
         {
             //Scanner
- 
+            Jason_Scanner = new Scanner();
             Jason_Scanner.StartScanning(SourceCode);
             //Parser
             //Sematic Analysis
