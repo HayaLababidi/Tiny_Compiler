@@ -225,9 +225,15 @@ namespace JASON_Compiler
                     if (CurrentChar == '*')
                     {
                         j++;
-                        while (SourceCode[j] != '*' && SourceCode[j + 1] != '/' && j < SourceCode.Length)
+                        while (j + 1 < SourceCode.Length && !(SourceCode[j] == '*' && SourceCode[j + 1] == '/'))
                         {
                             j++;
+                        }
+                        if (j + 1 >= SourceCode.Length)
+                        {
+                            Errors.Error_List.Add(CurrentLexeme + " End-of-file found, '*/' expected\n");
+                            end = true;
+                            break;
                         }
                         j++;
                     }
@@ -235,12 +241,6 @@ namespace JASON_Compiler
                     {
                         FindTokenClass("/");
                         j--;
-                    }
-                    if (j == SourceCode.Length)//end of file no }
-                    {
-
-                        //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
-
                     }
                     i = j;
                 }
