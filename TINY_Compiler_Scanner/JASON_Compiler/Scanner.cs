@@ -244,11 +244,11 @@ namespace JASON_Compiler
                     }
                     i = j;
                 }
-                else
+                else//all operators
                 {
                     if (CurrentChar == '<')
                     {
-                        if (SourceCode[j + 1] == '>')
+                        if (j + 1 < SourceCode.Length && SourceCode[j + 1] == '>')
                         {
                             FindTokenClass("<>");
                             j++;
