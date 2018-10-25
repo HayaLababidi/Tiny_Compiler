@@ -10,7 +10,7 @@ public enum Token_Class
     Int, Float, String, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, LCurlyBraces, RCurlyBraces, OrOp,
     AndOp, AssignmentOp, NotEqual, IsEqual, LessThanOp, GreaterThanOp, PlusOp, MinusOp, MultiplyOp,
-    DivideOp, Constant, Identifier
+    DivideOp, Constant, Identifier, DoubleQuotes 
 }
 namespace JASON_Compiler
 {
@@ -54,6 +54,7 @@ namespace JASON_Compiler
             Operators.Add(")", Token_Class.RParanthesis);
             Operators.Add("{", Token_Class.LCurlyBraces);
             Operators.Add("}", Token_Class.RCurlyBraces);
+            Operators.Add("\"", Token_Class.DoubleQuotes);
 
             Operators.Add("||", Token_Class.OrOp);
             Operators.Add("&&", Token_Class.AndOp);
@@ -80,13 +81,14 @@ namespace JASON_Compiler
                 char CurrentChar = SourceCode[i];
                 string CurrentLexeme = CurrentChar.ToString();
 
+                //if space delimeter skip
                 if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
                     continue;
-
+                //if starts with letters check if its all letters|| numbers --> identifier 
                 if ((CurrentChar >= 'A' && CurrentChar <= 'Z') || (CurrentChar >= 'a' && CurrentChar <= 'z')) //if you read a character
                 {
                     j++;
-                    if (j == SourceCode.Length)
+                    if (j == SourceCode.Length)//reached end of file
                     {
                         FindTokenClass(CurrentLexeme);
                         break;
@@ -115,11 +117,11 @@ namespace JASON_Compiler
                     }
 
                 }
-
+                //if its a number (constant)
                 else if (CurrentChar >= '0' && CurrentChar <= '9')
                 {
                     j++;
-                    if (j == SourceCode.Length)
+                    if (j == SourceCode.Length)//only one digit and code ended 
                     {
                         FindTokenClass(CurrentLexeme);
                         break;
@@ -128,7 +130,7 @@ namespace JASON_Compiler
                     else
                     {
                         CurrentChar = SourceCode[j];
-                        while (CurrentChar >= '0' && CurrentChar <= '9')
+                        while (CurrentChar >= '0' && CurrentChar <= '9')//multiple digits
                         {
                             CurrentLexeme += CurrentChar;
                             j++;
@@ -141,40 +143,80 @@ namespace JASON_Compiler
                             else
                                 CurrentChar = SourceCode[j];
                         }
-                        if (end)
-                            break;
-                        if (CurrentChar == '.')
+                        if (CurrentChar == '.')//float number
                         {
                             CurrentLexeme += CurrentChar;
                             j++;
-                            CurrentChar = SourceCode[j];
-                            while (CurrentChar >= '0' && CurrentChar <= '9')
+                            if (j == SourceCode.Length)//not complete float and end of file
                             {
-                                CurrentLexeme += CurrentChar;
-                                j++;
+                                Errors.Error_List.Add(CurrentLexeme + "is not an identifier or constant (not complete float)\n");
+                                end = true;
+                                break;
+                            }
+                            else
                                 CurrentChar = SourceCode[j];
+                            if (!(CurrentChar >= '0' && CurrentChar <= '9'))//(example 5.) not complete float
+                            {// to get the lexeme detected by error detection and getting the full error lexeme
+                                // by declaring that the dot found not for a float number
+                                j--;
+                                CurrentChar = SourceCode[j];
+                                CurrentLexeme=CurrentLexeme.Remove(CurrentLexeme.Count() - 1);
+                            }
+                            else
+                            {
+                                while (CurrentChar >= '0' && CurrentChar <= '9')//one or more digits after dot -->float
+                                {
+                                    CurrentLexeme += CurrentChar;
+                                    j++;
+                                    if (j == SourceCode.Length)
+                                    {
+                                        FindTokenClass(CurrentLexeme);
+                                        end = true;
+                                        break;
+                                    }
+                                    else
+                                        CurrentChar = SourceCode[j];
+                                }
                             }
                         }
-                        else if (!(Operators.ContainsKey(CurrentChar.ToString())) && !(CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+
+                        if (end)
+                            break;
+
+                        //ERROR DETECTION IN LEXEMES STARTING WITH NUMBERS
+                        string currentop; // not all operators comes after numbers and cuase no errors only the numerical operators 
+                        if (j + 1 < SourceCode.Length)
                         {
-                            while (!(Operators.ContainsKey(CurrentChar.ToString())) && !(CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                            currentop = "" + (char)SourceCode[j] + (char)SourceCode[j + 1];
+                        }
+                        else currentop = (char)SourceCode[j] + " ";
+                        if (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                        {
+
+                            while (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
                             {
                                 CurrentLexeme += CurrentChar;
                                 j++;
                                 if(j == SourceCode.Length)
                                 {
-                                    Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
+                                    //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
                                     break;
                                 }
                                 else
                                     CurrentChar = SourceCode[j];
                                 //error
+                                if (j + 1 < SourceCode.Length)
+                                {
+                                    currentop = "" + (char)SourceCode[j] + (char)SourceCode[j + 1];
+                                }
+                                else currentop = (char)SourceCode[j] + " ";
                             }
+                            Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant\n");
                         }
-                        FindTokenClass(CurrentLexeme);
+                        else //if not error add to tokens
+                            FindTokenClass(CurrentLexeme);
                         i = j - 1;
                      }
-                    
                 }
                 else if (CurrentChar == '/')
                 {
@@ -189,10 +231,15 @@ namespace JASON_Compiler
                         }
                         j++;
                     }
+                    else// divid operator not a comment
+                    {
+                        FindTokenClass("/");
+                        j--;
+                    }
                     if (j == SourceCode.Length)//end of file no }
                     {
 
-                        //error } expected
+                        //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
 
                     }
                     i = j;
@@ -282,6 +329,12 @@ namespace JASON_Compiler
             Tokens.Add(Tok);
         }
 
+        bool isNumericalOperator(string lex)
+        {
+            if ((lex == "||") || (lex == "&&") || (lex == ":=") || (lex == "<>") || (lex[0] == ')') || (lex[0] == '=') || (lex[0] == '<') || (lex[0] == '>') || (lex[0] == '+') || (lex[0] == '-') || (lex[0] == '/') || (lex[0] == '*'))
+                return true;
+            return false;
+        }
 
 
         bool isIdentifier(string lex)
