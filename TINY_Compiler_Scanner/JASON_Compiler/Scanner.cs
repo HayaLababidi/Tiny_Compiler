@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 public enum Token_Class
 {
-    DataTypeInt, DataTypeFloat, DataTypeString, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
+    Int, Float, String, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, LCurlyBraces, RCurlyBraces, OrOp,
     AndOp, AssignmentOp, NotEqual, IsEqual, LessThanOp, GreaterThanOp, PlusOp, MinusOp, MultiplyOp,
-    DivideOp, Number, Identifier, DoubleQuotes, String
+    DivideOp, Constant, Identifier, DoubleQuotes, StringValue
 }
 namespace JASON_Compiler
 {
@@ -31,9 +31,9 @@ namespace JASON_Compiler
 
         public Scanner()
         {
-            ReservedWords.Add("int", Token_Class.DataTypeInt);
-            ReservedWords.Add("float", Token_Class.DataTypeFloat);
-            ReservedWords.Add("string", Token_Class.DataTypeString);
+            ReservedWords.Add("int", Token_Class.Int);
+            ReservedWords.Add("float", Token_Class.Float);
+            ReservedWords.Add("string", Token_Class.String);
             ReservedWords.Add("read", Token_Class.Read);
             ReservedWords.Add("write", Token_Class.Write);
             ReservedWords.Add("repeat", Token_Class.Repeat);
@@ -45,6 +45,7 @@ namespace JASON_Compiler
             ReservedWords.Add("return", Token_Class.Return);
             ReservedWords.Add("endl", Token_Class.Endl);
             ReservedWords.Add("end", Token_Class.End);
+            ReservedWords.Add("main", Token_Class.Main);
 
             Operators.Add(".", Token_Class.Dot);
             Operators.Add(";", Token_Class.Semicolon);
@@ -322,7 +323,7 @@ namespace JASON_Compiler
             //Is it a string?
             if (Lex.Contains('"'))
             {
-                Tok.token_type = Token_Class.String;
+                Tok.token_type = Token_Class.StringValue;
                 Tok.lex = Lex.Substring(1, Lex.Count()-1);
             }
             //Is it a reserved word?
@@ -344,7 +345,10 @@ namespace JASON_Compiler
             //Is it a Constant?
             else if (Lex[0] >= '0' && Lex[0] <= '9')
             {
-                Tok.token_type = Token_Class.Number;
+                if (Lex.Contains('.'))
+                    Tok.token_type = Token_Class.Float;
+                else
+                    Tok.token_type = Token_Class.Constant;
             }
             //Is it an operator?
             else if (Operators.ContainsKey(Lex))
