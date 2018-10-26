@@ -118,9 +118,7 @@ namespace JASON_Compiler
                 }
                 else if (CurrentChar == '"')
                 {
-                    CurrentLexeme += CurrentChar;
                     j++;
-                    CurrentChar = SourceCode[j];
                     while (j < SourceCode.Length && SourceCode[j] != '"')
                     {
                         CurrentChar = SourceCode[j];
@@ -135,6 +133,8 @@ namespace JASON_Compiler
                     }
                     else
                     {
+
+                        CurrentLexeme += '"';
                         FindTokenClass(CurrentLexeme);
                     }
 
