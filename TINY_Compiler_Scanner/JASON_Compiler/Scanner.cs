@@ -81,7 +81,7 @@ namespace JASON_Compiler
                 string CurrentLexeme = CurrentChar.ToString();
 
                 //if space delimeter skip
-                if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n')
+                if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n' || CurrentChar == '\t')
                     continue;
                 //if starts with letters check if its all letters|| numbers --> identifier 
                 if ((CurrentChar >= 'A' && CurrentChar <= 'Z') || (CurrentChar >= 'a' && CurrentChar <= 'z')) //if you read a character
@@ -216,10 +216,10 @@ namespace JASON_Compiler
                             currentop = "" + (char)SourceCode[j] + (char)SourceCode[j + 1];
                         }
                         else currentop = (char)SourceCode[j] + " ";
-                        if (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                        if (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n' || CurrentChar == '\t'))
                         {
 
-                            while (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                            while (!isNumericalOperator(currentop) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n' || CurrentChar == '\t'))
                             {
                                 CurrentLexeme += CurrentChar;
                                 j++;
@@ -364,7 +364,7 @@ namespace JASON_Compiler
                 Tok.token_type = Token_Class.String;
             }
             //Is it a comment?
-            if (Lex[0]=='/'&&Lex[1]=='*')
+            if (Lex.Length>1 && Lex[0]=='/'&&Lex[1]=='*')
             {
                 Tok.token_type = Token_Class.comment;
 
