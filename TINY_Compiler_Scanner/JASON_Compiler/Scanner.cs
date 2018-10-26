@@ -79,7 +79,7 @@ namespace JASON_Compiler
                 int j = i;
                 char CurrentChar = SourceCode[i];
                 string CurrentLexeme = CurrentChar.ToString();
-
+                 
                 //if space delimeter skip
                 if (CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n' || CurrentChar == '\t')
                     continue;

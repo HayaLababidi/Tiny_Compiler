@@ -20,7 +20,7 @@ namespace JASON_Compiler
         private void button1_Click(object sender, EventArgs e)
         {
             textBox2.Clear();
-            string Code=textBox1.Text.ToLower();
+            string Code=richTextBox1.Text.ToLower();
             JASON_Compiler.Lexemes.Clear();
             JASON_Compiler.TokenStream.Clear();
             Errors.Error_List.Clear();
@@ -30,6 +30,24 @@ namespace JASON_Compiler
          //   PrintLexemes();
 
             PrintErrors();
+        }
+        private void CheckKeyword(string word, Color color, int startIndex)
+        {
+            // int v=word.Length;
+            if (this.richTextBox1.Text.Contains(word))
+            {
+                int index = -1;
+                int selectStart = this.richTextBox1.SelectionStart;
+                while ((index = this.richTextBox1.Text.IndexOf(word, (index + 1))) != -1)
+                {
+                    // this.richTextBox1.Select(richTextBox1.Text.IndexOf(word), word.Length);
+                    this.richTextBox1.Select((index + startIndex), word.Length);
+                    this.richTextBox1.SelectionColor = color;
+                    this.richTextBox1.Select(selectStart, 0);
+                    this.richTextBox1.SelectionColor = Color.Black;
+                }
+
+            }
         }
         void PrintTokens()
         {            
@@ -53,6 +71,26 @@ namespace JASON_Compiler
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
+        }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+            this.CheckKeyword("int", Color.Blue, 0);
+            this.CheckKeyword("Int", Color.Blue, 0);
+            this.CheckKeyword("float", Color.Blue, 0);
+            this.CheckKeyword("string", Color.Blue, 0);
+            this.CheckKeyword("read", Color.Olive, 0);
+            this.CheckKeyword("write", Color.Olive, 0);
+            this.CheckKeyword("repeat", Color.Orange, 0);
+            this.CheckKeyword("until", Color.Orange, 0);
+            this.CheckKeyword("if", Color.LightSeaGreen, 0);
+            this.CheckKeyword("elseif", Color.LightSeaGreen, 0);
+            this.CheckKeyword("else", Color.LightSeaGreen, 0);
+            this.CheckKeyword("then", Color.LightSeaGreen, 0);
+            this.CheckKeyword("return", Color.LightGreen, 0);
+            this.CheckKeyword("endl", Color.Red, 0);
+            this.CheckKeyword("end", Color.Red, 0);
+            this.CheckKeyword("main", Color.Green, 0);
         }
         /*  void PrintLexemes()
 {
