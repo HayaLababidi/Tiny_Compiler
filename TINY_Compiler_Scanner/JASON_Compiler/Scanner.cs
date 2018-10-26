@@ -267,49 +267,70 @@ namespace JASON_Compiler
                     }
                     i = j;
                 }
-                else//all operators
+                else if (CurrentChar == '<')
                 {
-                    if (CurrentChar == '<')
+                    if (j + 1 < SourceCode.Length && SourceCode[j + 1] == '>')
                     {
-                        if (j + 1 < SourceCode.Length && SourceCode[j + 1] == '>')
-                        {
-                            FindTokenClass("<>");
-                            j++;
-                        }
-                        else
-                            FindTokenClass(CurrentChar.ToString());
+                        FindTokenClass("<>");
+                        j++;
                     }
-                    else if (CurrentChar == '|')
-                    {
-                        if (SourceCode[j + 1] == '|')
-                        {
-                            FindTokenClass("||");
-                            j++;
-                        }
-
-                    }
-                    else if (CurrentChar == '&')
-                    {
-                        if (SourceCode[j + 1] == '&')
-                        {
-                            FindTokenClass("&&");
-                            j++;
-                        }
-                    }
-                    else if (CurrentChar == ':')
-                    {
-                        if (SourceCode[j + 1] == '=')
-                        {
-                            FindTokenClass(":=");
-                            j++;
-                        }
-                    }
-                    else if (Operators.ContainsKey(CurrentChar.ToString()))
+                    else
                     {
                         FindTokenClass(CurrentChar.ToString());
-
                     }
                     i = j;
+                }
+                else if (CurrentChar == '|')
+                {
+                    if (SourceCode[j + 1] == '|')
+                    {
+                        FindTokenClass("||");
+                        j++;
+                    }
+                    i = j;
+                }
+                else if (CurrentChar == '&')
+                {
+                    if (SourceCode[j + 1] == '&')
+                    {
+                        FindTokenClass("&&");
+                        j++;
+                    }
+                    i = j;
+                }
+                else if (CurrentChar == ':')
+                {
+                    if (SourceCode[j + 1] == '=')
+                    {
+                        FindTokenClass(":=");
+                        j++;
+                    }
+                    i = j;
+                }
+                else if (Operators.ContainsKey(CurrentChar.ToString()))
+                {
+                    FindTokenClass(CurrentChar.ToString());
+
+                }
+                else//all operators
+                {
+                    j++;
+                    while (!Operators.ContainsKey(CurrentChar.ToString()) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                    {
+                        if (j == SourceCode.Length)
+                        {
+                            //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
+                            break;
+                        }
+                        CurrentLexeme += CurrentChar;
+                        j++;
+                        if (j != SourceCode.Length)
+                        {
+                            CurrentChar = SourceCode[j];
+                        }
+                    }
+                    Errors.Error_List.Add(CurrentLexeme + " Unrecognized token \n");
+                    i = j-1;
                 }
             }
 
