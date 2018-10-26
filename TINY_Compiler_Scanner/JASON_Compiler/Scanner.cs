@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 
 public enum Token_Class
 {
-    Int, Float, String, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
+    DataTypeInt, DataTypeFloat, DataTypeString, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, LCurlyBraces, RCurlyBraces, OrOp,
     AndOp, AssignmentOp, NotEqual, IsEqual, LessThanOp, GreaterThanOp, PlusOp, MinusOp, MultiplyOp,
-    DivideOp, Constant, Identifier, DoubleQuotes, StringValue
+    DivideOp, Number, Identifier, DoubleQuotes, String
 }
 namespace JASON_Compiler
 {
-
 
     public class Token
     {
@@ -31,9 +30,9 @@ namespace JASON_Compiler
 
         public Scanner()
         {
-            ReservedWords.Add("int", Token_Class.Int);
-            ReservedWords.Add("float", Token_Class.Float);
-            ReservedWords.Add("string", Token_Class.String);
+            ReservedWords.Add("int", Token_Class.DataTypeInt);
+            ReservedWords.Add("float", Token_Class.DataTypeFloat);
+            ReservedWords.Add("string", Token_Class.DataTypeString);
             ReservedWords.Add("read", Token_Class.Read);
             ReservedWords.Add("write", Token_Class.Write);
             ReservedWords.Add("repeat", Token_Class.Repeat);
@@ -45,7 +44,7 @@ namespace JASON_Compiler
             ReservedWords.Add("return", Token_Class.Return);
             ReservedWords.Add("endl", Token_Class.Endl);
             ReservedWords.Add("end", Token_Class.End);
-            ReservedWords.Add("main", Token_Class.Main);
+            //ReservedWords.Add("main", Token_Class.Main);
 
             Operators.Add(".", Token_Class.Dot);
             Operators.Add(";", Token_Class.Semicolon);
@@ -119,7 +118,9 @@ namespace JASON_Compiler
                 }
                 else if (CurrentChar == '"')
                 {
+                    CurrentLexeme += CurrentChar;
                     j++;
+                    CurrentChar = SourceCode[j];
                     while (j < SourceCode.Length && SourceCode[j] != '"')
                     {
                         CurrentChar = SourceCode[j];
@@ -323,8 +324,7 @@ namespace JASON_Compiler
             //Is it a string?
             if (Lex.Contains('"'))
             {
-                Tok.token_type = Token_Class.StringValue;
-                Tok.lex = Lex.Substring(1, Lex.Count()-1);
+                Tok.token_type = Token_Class.String;
             }
             //Is it a reserved word?
             
@@ -345,10 +345,7 @@ namespace JASON_Compiler
             //Is it a Constant?
             else if (Lex[0] >= '0' && Lex[0] <= '9')
             {
-                if (Lex.Contains('.'))
-                    Tok.token_type = Token_Class.Float;
-                else
-                    Tok.token_type = Token_Class.Constant;
+                Tok.token_type = Token_Class.Number;
             }
             //Is it an operator?
             else if (Operators.ContainsKey(Lex))
