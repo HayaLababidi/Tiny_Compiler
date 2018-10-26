@@ -10,7 +10,7 @@ public enum Token_Class
     DataTypeInt, DataTypeFloat, DataTypeString, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, LCurlyBraces, RCurlyBraces, OrOp,
     AndOp, AssignmentOp, NotEqual, IsEqual, LessThanOp, GreaterThanOp, PlusOp, MinusOp, MultiplyOp,
-    DivideOp, Number, Identifier, DoubleQuotes, String
+    DivideOp, Number, Identifier, DoubleQuotes, String, comment, FloatNumber
 }
 namespace JASON_Compiler
 {
@@ -119,7 +119,7 @@ namespace JASON_Compiler
                 else if (CurrentChar == '"')
                 {
                     j++;
-                    while (j < SourceCode.Length && SourceCode[j] != '"')
+                    while (j < SourceCode.Length && SourceCode[j] != '"' && SourceCode[j] != '\n')
                     {
                         CurrentChar = SourceCode[j];
                         CurrentLexeme += CurrentChar;
@@ -131,9 +131,12 @@ namespace JASON_Compiler
                         end = true;
                         break;
                     }
+                    else if (SourceCode[j] == '\n')
+                    {
+                        Errors.Error_List.Add(CurrentLexeme + " ; expected (a string was not closed with\") \n");
+                    }
                     else
                     {
-
                         CurrentLexeme += '"';
                         FindTokenClass(CurrentLexeme);
                     }
@@ -247,18 +250,28 @@ namespace JASON_Compiler
                     CurrentChar = SourceCode[j];
                     if (CurrentChar == '*')
                     {
+                        CurrentLexeme += CurrentChar;
                         j++;
                         while (j + 1 < SourceCode.Length && !(SourceCode[j] == '*' && SourceCode[j + 1] == '/'))
                         {
+                            CurrentLexeme += SourceCode[j];
                             j++;
                         }
                         if (j + 1 >= SourceCode.Length)
                         {
-                            Errors.Error_List.Add(CurrentLexeme + " End-of-file found, '*/' expected\n");
+                            int len = 30;
+                            if (len >= CurrentLexeme.Length)
+                                len = CurrentLexeme.Length;
+                            Errors.Error_List.Add(CurrentLexeme.Substring(0,len) + " End-of-file found, '*/' expected\n");
                             end = true;
                             break;
                         }
+                        else
+                        {
+                            CurrentLexeme += "*/";
+                        }
                         j++;
+                        FindTokenClass(CurrentLexeme);
                     }
                     else// divid operator not a comment
                     {
@@ -314,7 +327,7 @@ namespace JASON_Compiler
                 }
                 else//all operators
                 {
-                    j++;
+                    
                     while (!Operators.ContainsKey(CurrentChar.ToString()) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
                     {
                         if (j == SourceCode.Length)
@@ -322,11 +335,14 @@ namespace JASON_Compiler
                             //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
                             break;
                         }
-                        CurrentLexeme += CurrentChar;
                         j++;
                         if (j != SourceCode.Length)
                         {
                             CurrentChar = SourceCode[j];
+                        }
+                        if (!Operators.ContainsKey(CurrentChar.ToString()) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
+                        {
+                            CurrentLexeme += CurrentChar;
                         }
                     }
                     Errors.Error_List.Add(CurrentLexeme + " Unrecognized token \n");
@@ -347,6 +363,12 @@ namespace JASON_Compiler
             {
                 Tok.token_type = Token_Class.String;
             }
+            //Is it a comment?
+            if (Lex[0]=='/'&&Lex[1]=='*')
+            {
+                Tok.token_type = Token_Class.comment;
+
+            }
             //Is it a reserved word?
             
             //Is it an identifier?
@@ -366,7 +388,10 @@ namespace JASON_Compiler
             //Is it a Constant?
             else if (Lex[0] >= '0' && Lex[0] <= '9')
             {
-                Tok.token_type = Token_Class.Number;
+                if (Lex.Contains('.'))
+                    Tok.token_type = Token_Class.FloatNumber;
+                else
+                    Tok.token_type = Token_Class.Number;
             }
             //Is it an operator?
             else if (Operators.ContainsKey(Lex))
