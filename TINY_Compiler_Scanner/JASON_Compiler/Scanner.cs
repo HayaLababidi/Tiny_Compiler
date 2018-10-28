@@ -325,7 +325,7 @@ namespace JASON_Compiler
                     FindTokenClass(CurrentChar.ToString());
 
                 }
-                else//all operators
+                else//all unrecognized tokens
                 {
                     
                     while (!Operators.ContainsKey(CurrentChar.ToString()) && !(CurrentChar == ';' || CurrentChar == ',' || CurrentChar == ' ' || CurrentChar == '\r' || CurrentChar == '\n'))
