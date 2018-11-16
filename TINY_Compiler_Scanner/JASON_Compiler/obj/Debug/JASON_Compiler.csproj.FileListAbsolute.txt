@@ -82,3 +82,6 @@ D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler
 D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Properties.Resources.resources
 D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
 D:\CS\FCIS\Semester 7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Parser_Form.resources
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe.config
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.exe
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.pdb
