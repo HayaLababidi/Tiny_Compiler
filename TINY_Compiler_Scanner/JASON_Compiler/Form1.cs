@@ -23,7 +23,7 @@ namespace JASON_Compiler
             string Code=richTextBox1.Text.ToLower();
             JASON_Compiler.Lexemes.Clear();
             JASON_Compiler.TokenStream.Clear();
-            Errors.Error_List.Clear();
+            Errors.Scanner_Error_List.Clear();
             JASON_Compiler.Jason_Scanner.Tokens.Clear();
             JASON_Compiler.Start_Compiling(Code);
             PrintTokens();
@@ -62,9 +62,9 @@ namespace JASON_Compiler
 
         void PrintErrors()
         {
-            for(int i=0; i<Errors.Error_List.Count; i++)
+            for(int i=0; i<Errors.Scanner_Error_List.Count; i++)
             {
-                textBox2.Text +="ERROR "+Convert.ToString(i+1)+": "+ Errors.Error_List[i];
+                textBox2.Text +="ERROR "+Convert.ToString(i+1)+": "+ Errors.Scanner_Error_List[i];
                 textBox2.AppendText(Environment.NewLine);
             }
         }
@@ -91,6 +91,12 @@ namespace JASON_Compiler
             this.CheckKeyword("endl", Color.Red, 0);
             this.CheckKeyword("end", Color.Red, 0);
             this.CheckKeyword("main", Color.Green, 0);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Parser_Form parse = new Parser_Form();
+            parse.Show();
         }
         /*  void PrintLexemes()
 {

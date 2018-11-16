@@ -127,13 +127,13 @@ namespace JASON_Compiler
                     }
                     if (j == SourceCode.Length)
                     {
-                        Errors.Error_List.Add(CurrentLexeme + " End-of-file found, '\"' expected\n");
+                        Errors.Scanner_Error_List.Add(CurrentLexeme + " End-of-file found, '\"' expected\n");
                         end = true;
                         break;
                     }
                     else if (SourceCode[j] == '\n')
                     {
-                        Errors.Error_List.Add(CurrentLexeme + " ; expected (a string was not closed with\") \n");
+                        Errors.Scanner_Error_List.Add(CurrentLexeme + " ; expected (a string was not closed with\") \n");
                     }
                     else
                     {
@@ -175,7 +175,7 @@ namespace JASON_Compiler
                             j++;
                             if (j == SourceCode.Length)//not complete float and end of file
                             {
-                                Errors.Error_List.Add(CurrentLexeme + "is not an identifier or constant (not complete float)\n");
+                                Errors.Scanner_Error_List.Add(CurrentLexeme + "is not an identifier or constant (not complete float)\n");
                                 end = true;
                                 break;
                             }
@@ -225,7 +225,7 @@ namespace JASON_Compiler
                                 j++;
                                 if (j == SourceCode.Length)
                                 {
-                                    //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
+                                    //Errors.Scanner_Error_List.Add(CurrentLexeme + " is not an identifier or constant");
                                     break;
                                 }
                                 else
@@ -237,7 +237,7 @@ namespace JASON_Compiler
                                 }
                                 else currentop = (char)SourceCode[j] + " ";
                             }
-                            Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant\n");
+                            Errors.Scanner_Error_List.Add(CurrentLexeme + " is not an identifier or constant\n");
                         }
                         else //if not error add to tokens
                             FindTokenClass(CurrentLexeme);
@@ -262,7 +262,7 @@ namespace JASON_Compiler
                             int len = 30;
                             if (len >= CurrentLexeme.Length)
                                 len = CurrentLexeme.Length;
-                            Errors.Error_List.Add(CurrentLexeme.Substring(0,len) + " End-of-file found, '*/' expected\n");
+                            Errors.Scanner_Error_List.Add(CurrentLexeme.Substring(0,len) + " End-of-file found, '*/' expected\n");
                             end = true;
                             break;
                         }
@@ -332,7 +332,7 @@ namespace JASON_Compiler
                     {
                         if (j == SourceCode.Length)
                         {
-                            //Errors.Error_List.Add(CurrentLexeme + " is not an identifier or constant");
+                            //Errors.Scanner_Error_List.Add(CurrentLexeme + " is not an identifier or constant");
                             break;
                         }
                         j++;
@@ -345,7 +345,7 @@ namespace JASON_Compiler
                             CurrentLexeme += CurrentChar;
                         }
                     }
-                    Errors.Error_List.Add(CurrentLexeme + " Unrecognized token \n");
+                    Errors.Scanner_Error_List.Add(CurrentLexeme + " Unrecognized token \n");
                     i = j-1;
                 }
             }
