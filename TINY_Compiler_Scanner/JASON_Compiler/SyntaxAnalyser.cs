@@ -541,8 +541,12 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Function_list";
-            returned_node.children.Add(Function_statement(Tokens));
-            returned_node.children.Add(Function_list(Tokens));
+            if (Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.DataTypeString && Tokens[index+1].token_type != Token_Class.Main)
+            {
+                returned_node.children.Add(Function_statement(Tokens));
+                returned_node.children.Add(Function_list(Tokens));
+            }
+            
             return returned_node;
         }
         //use this function to print the parse tree in TreeView Toolbox
