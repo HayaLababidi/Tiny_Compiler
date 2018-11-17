@@ -17,7 +17,7 @@ namespace JASON_Compiler
         static int index = 0;
         public static Node Parse(List<Token> Tokens)
         {
-            Node root= new Node();
+            Node root = new Node();
             root.token = new Token();
 
             //write your parser code
@@ -28,7 +28,7 @@ namespace JASON_Compiler
             return root;
         }
 
-        public static Node Match(Token_Class expected_tok,List<Token> Tokens)
+        public static Node Match(Token_Class expected_tok, List<Token> Tokens)
         {
             if (expected_tok == Tokens[index].token_type)
             {
@@ -85,7 +85,7 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Declared_Var";
-            returned_node.children.Add(Match(Token_Class.Identifier,Tokens));
+            returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
             returned_node.children.Add(Declared_Var_Assignment(Tokens));
             return returned_node;
         }
@@ -236,7 +236,7 @@ namespace JASON_Compiler
 
             return returned_node;
         }
-        
+
         //Boolean_Operator → “&&” | “||”
         public static Node Boolean_Operator(List<Token> Tokens)
         {
@@ -280,7 +280,7 @@ namespace JASON_Compiler
                     returned_node.children.Add(Match(Token_Class.Identifier, Tokens));//identifier 
                 }
             }
-            
+
             return returned_node;
         }
 
@@ -294,11 +294,11 @@ namespace JASON_Compiler
             {
                 returned_node.children.Add(Match(Token_Class.String, Tokens));
             }
-            else if (Tokens[index].token_type == Token_Class.Number ||Tokens[index].token_type == Token_Class.FloatNumber||Tokens[index].token_type == Token_Class.Identifier)
+            else if (Tokens[index].token_type == Token_Class.Number || Tokens[index].token_type == Token_Class.FloatNumber || Tokens[index].token_type == Token_Class.Identifier)
             {
-                if(index + 1 < Tokens.Count &&(Tokens[index + 1].token_type == Token_Class.PlusOp|| Tokens[index + 1].token_type == Token_Class.MinusOp || Tokens[index + 1].token_type == Token_Class.MultiplyOp || Tokens[index + 1].token_type == Token_Class.DivideOp))
+                if (index + 1 < Tokens.Count && (Tokens[index + 1].token_type == Token_Class.PlusOp || Tokens[index + 1].token_type == Token_Class.MinusOp || Tokens[index + 1].token_type == Token_Class.MultiplyOp || Tokens[index + 1].token_type == Token_Class.DivideOp))
                     returned_node.children.Add(Equation(Tokens));//equation
-                else 
+                else
                     returned_node.children.Add(Term(Tokens));//term
             }
             else if (Tokens[index].token_type == Token_Class.LParanthesis)//equation
@@ -353,7 +353,7 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Addop";
-            if (Tokens[index].token_type == Token_Class.MinusOp )
+            if (Tokens[index].token_type == Token_Class.MinusOp)
             {
                 returned_node.children.Add(Match(Token_Class.MinusOp, Tokens));
             }
@@ -439,12 +439,13 @@ namespace JASON_Compiler
         }
 
         //Assignment_statement → identifier Assignment_operator Expression
-        public static Node Assignment_stmnt(List<Token> Tokens){
+        public static Node Assignment_stmnt(List<Token> Tokens)
+        {
 
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Assignment statement";
-            returned_node.children.Add(Match(Token_Class.Identifier,Tokens));
+            returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
             returned_node.children.Add(Assignment_op(Tokens));
             returned_node.children.Add(Expression(Tokens));
 
@@ -470,7 +471,7 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Prameters";
-            returned_node.children.Add(Datatype(Tokens));
+            returned_node.children.Add(DataType(Tokens));
             returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
             returned_node.children.Add(Parametersdash(Tokens));
             return returned_node;
@@ -484,7 +485,7 @@ namespace JASON_Compiler
             if (Tokens[index].token_type == Token_Class.Comma)
             {
                 returned_node.children.Add(Match(Token_Class.Comma, Tokens));
-                returned_node.children.Add(Datatype(Tokens));
+                returned_node.children.Add(DataType(Tokens));
                 returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
                 returned_node.children.Add(Parametersdash(Tokens));
             }
@@ -518,7 +519,7 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Main_Function";
-            returned_node.children.Add(Datatype(Tokens));
+            returned_node.children.Add(DataType(Tokens));
             returned_node.children.Add(Match(Token_Class.Main, Tokens));
             returned_node.children.Add(Match(Token_Class.LParanthesis, Tokens));
             returned_node.children.Add(Match(Token_Class.RParanthesis, Tokens));
@@ -541,20 +542,141 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Function_list";
-            if (Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.DataTypeString && Tokens[index+1].token_type != Token_Class.Main)
+            if (Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.DataTypeString && Tokens[index + 1].token_type != Token_Class.Main)
             {
                 returned_node.children.Add(Function_statement(Tokens));
                 returned_node.children.Add(Function_list(Tokens));
             }
-            
+
             return returned_node;
         }
+        //---------------------------------------------------------------------------------------------------------------------
+        //Condition_Statement → Condition Boolean_Exp
+        public static Node Condition_Statement(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Condition_Statement";
+            returned_node.children.Add(Condition(Tokens));
+            returned_node.children.Add(Boolean_Exp(Tokens));
+            return returned_node;
+        }
+
+        //Boolean_Exp → Boolean_Operator Condition Boolean_Exp | ε
+        public static Node Boolean_Exp(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Boolean_Exp";
+            if (Tokens[index].token_type == Token_Class.AndOp || Tokens[index].token_type == Token_Class.OrOp)
+            {
+                returned_node.children.Add(Boolean_Operator(Tokens));
+                returned_node.children.Add(Condition(Tokens));
+                returned_node.children.Add(Boolean_Exp(Tokens));
+                return returned_node;
+            }
+
+            return null;
+
+        }
+
+        //If_Statement → if Condition_Statement then Statements Else_part
+        public static Node If_Statement(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "If_Statement";
+            returned_node.children.Add(Match(Token_Class.If, Tokens));
+            returned_node.children.Add(Condition_Statement(Tokens));
+            returned_node.children.Add(Match(Token_Class.Then, Tokens));
+            returned_node.children.Add(Statements(Tokens));
+            returned_node.children.Add(Else_part(Tokens));
+            return returned_node;
+        }
+
+        //Else_part → Else_If_Statment | Else_Statment | end
+        public static Node Else_part(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Else_part";
+
+            if (Tokens[index].token_type == Token_Class.Elseif)
+                returned_node.children.Add(Else_If_Statement(Tokens));
+            else if (Tokens[index].token_type == Token_Class.Else)
+                returned_node.children.Add(Else_Statment(Tokens));
+            else
+                returned_node.children.Add(Match(Token_Class.End, Tokens));
+
+            return returned_node;
+        }
+        //Else_If_Statement → elseif Condition_Statement then Statements Else_part
+        public static Node Else_If_Statement(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Else_If_Statement";
+            returned_node.children.Add(Match(Token_Class.Elseif, Tokens));
+            returned_node.children.Add(Condition_Statement(Tokens));
+            returned_node.children.Add(Match(Token_Class.Then, Tokens));
+            returned_node.children.Add(Statements(Tokens));
+            returned_node.children.Add(Else_part(Tokens));
+            return returned_node;
+        }
+        //Else_Statment → else Statements end
+        public static Node Else_Statment(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Else_Statment";
+            returned_node.children.Add(Match(Token_Class.Else, Tokens));
+            returned_node.children.Add(Statements(Tokens));
+            returned_node.children.Add(Match(Token_Class.End, Tokens));
+            return returned_node;
+        }
+
+        //Repeat_Statement→ repeat Statements until Condition_Statement
+        public static Node Repeat_Statement(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Repeat_Statement";
+            returned_node.children.Add(Match(Token_Class.Repeat, Tokens));
+            returned_node.children.Add(Statements(Tokens));
+            returned_node.children.Add(Match(Token_Class.Until, Tokens));
+            returned_node.children.Add(Condition_Statement(Tokens));
+            return returned_node;
+        }
+        //Parameter→ Datatype identifier
+        public static Node Parameter(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Parameter";
+            returned_node.children.Add(DataType(Tokens));
+            returned_node.children.Add(Match(Token_Class.Repeat, Tokens));
+            return returned_node;
+        }
+        //Function_Declaration→ Datatype identifier (Parameters )
+        public static Node Function_Declaration(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Function_Declaration";
+            returned_node.children.Add(DataType(Tokens));
+            returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
+            returned_node.children.Add(Match(Token_Class.LParanthesis, Tokens));
+            returned_node.children.Add(Prameters(Tokens));
+            returned_node.children.Add(Match(Token_Class.RParanthesis, Tokens));
+            return returned_node;
+        }
+      
         //use this function to print the parse tree in TreeView Toolbox
         public static TreeNode PrintParseTree(Node root)
         {
             TreeNode tree = new TreeNode("Parse Tree");
             TreeNode treeRoot = PrintTree(root);
-            if(treeRoot != null)
+            if (treeRoot != null)
                 tree.Nodes.Add(treeRoot);
             return tree;
         }

@@ -88,3 +88,6 @@ D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\Tiny_Compiler\TINY_Compiler_
 E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe.config
 E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.exe
 E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.pdb
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe.config
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.exe
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.pdb
