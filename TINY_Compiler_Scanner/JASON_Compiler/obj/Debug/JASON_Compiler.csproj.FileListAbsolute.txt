@@ -91,3 +91,11 @@ E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\
 E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe.config
 E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.exe
 E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.pdb
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.pdb
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csprojResolveAssemblyReference.cache
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Form1.resources
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Form2.resources
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Parser_Form.resources
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Properties.Resources.resources
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
