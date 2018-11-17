@@ -463,6 +463,88 @@ namespace JASON_Compiler
             return returned_node;
         }
 
+
+        //-----------------Yomna
+        public static Node Prameters(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Prameters";
+            returned_node.children.Add(Datatype(Tokens));
+            returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
+            returned_node.children.Add(Parametersdash(Tokens));
+            return returned_node;
+        }
+
+        public static Node Parametersdash(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Parametersdash";
+            if (Tokens[index].token_type == Token_Class.Comma)
+            {
+                returned_node.children.Add(Match(Token_Class.Comma, Tokens));
+                returned_node.children.Add(Datatype(Tokens));
+                returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
+                returned_node.children.Add(Parametersdash(Tokens));
+            }
+            return returned_node;
+        }
+
+        public static Node Function_body(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Function_body";
+            returned_node.children.Add(Match(Token_Class.LCurlyBraces, Tokens));
+            returned_node.children.Add(Statements(Tokens));
+            returned_node.children.Add(Return_Statement(Tokens));
+            returned_node.children.Add(Match(Token_Class.RCurlyBraces, Tokens));
+            return returned_node;
+        }
+
+        public static Node Function_statement(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Function_statement";
+            returned_node.children.Add(Function_Declaration(Tokens));
+            returned_node.children.Add(Function_body(Tokens));
+            return returned_node;
+        }
+
+        public static Node Main_Function(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Main_Function";
+            returned_node.children.Add(Datatype(Tokens));
+            returned_node.children.Add(Match(Token_Class.Main, Tokens));
+            returned_node.children.Add(Match(Token_Class.LParanthesis, Tokens));
+            returned_node.children.Add(Match(Token_Class.RParanthesis, Tokens));
+            returned_node.children.Add(Function_body(Tokens));
+            return returned_node;
+        }
+
+        public static Node Program(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Program";
+            returned_node.children.Add(Function_list(Tokens));
+            returned_node.children.Add(Main_Function(Tokens));
+            return returned_node;
+        }
+
+        public static Node Function_list(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Function_list";
+            returned_node.children.Add(Function_statement(Tokens));
+            returned_node.children.Add(Function_list(Tokens));
+            return returned_node;
+        }
         //use this function to print the parse tree in TreeView Toolbox
         public static TreeNode PrintParseTree(Node root)
         {
