@@ -44,7 +44,7 @@ namespace JASON_Compiler
             ReservedWords.Add("return", Token_Class.Return);
             ReservedWords.Add("endl", Token_Class.Endl);
             ReservedWords.Add("end", Token_Class.End);
-            //ReservedWords.Add("main", Token_Class.Main);
+            ReservedWords.Add("main", Token_Class.Main);
 
             Operators.Add(".", Token_Class.Dot);
             Operators.Add(";", Token_Class.Semicolon);
@@ -366,7 +366,8 @@ namespace JASON_Compiler
             //Is it a comment?
             if (Lex.Length>1 && Lex[0]=='/'&&Lex[1]=='*')
             {
-                Tok.token_type = Token_Class.comment;
+                //Tok.token_type = Token_Class.comment;
+                return;
 
             }
             //Is it a reserved word?

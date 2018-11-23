@@ -53,7 +53,6 @@ namespace JASON_Compiler
         {            
             dataGridView1.Rows.Clear();
             dataGridView1.Refresh();
-            MessageBox.Show(Convert.ToString(JASON_Compiler.Jason_Scanner.Tokens.Count));
             for (int i = 0; i < JASON_Compiler.Jason_Scanner.Tokens.Count; i++)
             {
                dataGridView1.Rows.Add(JASON_Compiler.Jason_Scanner.Tokens.ElementAt(i).lex, JASON_Compiler.Jason_Scanner.Tokens.ElementAt(i).token_type);

@@ -17,16 +17,8 @@ namespace JASON_Compiler
         static int index = 0;
         public static Node Parse(List<Token> Tokens)
         {
-            Node root = new Node();
-            root.token = new Token();
-            root.token.lex = "Parse";
-            root.children.Add(Program(Tokens));
+            Node root = Program(Tokens);
             PrintParseTree(root);
-            //write your parser code
-            //root.children.Add(Match(Token_Class.Program, Tokens));
-            //root.children.Add(Header(Tokens));
-            //root.children.Add(DecSec(Tokens));
-            //root.children.Add(Block(Tokens));
             return root;
         }
 
@@ -41,8 +33,8 @@ namespace JASON_Compiler
             }
             else
             {
-                //error
-                Node terminal = new Node();
+                Errors.Parser_Error_List.Add("Expected " + expected_tok.ToString() + " ,found " + Tokens[index].token_type.ToString());
+                index++;
                 return null;
             }
         }
@@ -534,12 +526,13 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Function_list";
-            if (Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.DataTypeString && Tokens[index + 1].token_type != Token_Class.Main)
+            if ((Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.DataTypeString) && index+1<Tokens.Count && Tokens[index + 1].token_type != Token_Class.Main)
             {
                 returned_node.children.Add(Function_statement(Tokens));
                 returned_node.children.Add(Function_list(Tokens));
             }
-
+            else
+                return null;
             return returned_node;
         }
         //yasmen---------------------------------------------------------------------------------------------------------------------
@@ -680,8 +673,8 @@ namespace JASON_Compiler
             returned_node.children.Add(Match(Token_Class.RParanthesis, Tokens));
             return returned_node;
         }
-        
-        //Arguments → ,identifier Arguments| ε
+
+        //Arguments → ,Expression Arguments| ε
         public static Node Arguments(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -690,22 +683,22 @@ namespace JASON_Compiler
             if (Tokens[index].token_type == Token_Class.Comma)
             {
                 returned_node.children.Add(Match(Token_Class.Comma, Tokens));
-                returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
+                returned_node.children.Add(Expression(Tokens));
                 returned_node.children.Add(Arguments(Tokens));
                 return returned_node;
             }           
             return null;
         }
-        
-        //Argument_List → identifier Arguments | ε
+
+        //Argument_List → Expression Arguments | ε
         public static Node Argument_List(List<Token> Tokens)
         {
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Argument_List";
-            if (Tokens[index].token_type == Token_Class.Identifier)
+            if (Tokens[index].token_type != Token_Class.RParanthesis)
             {
-                returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
+                returned_node.children.Add(Expression(Tokens));
                 returned_node.children.Add(Arguments(Tokens));
                 return returned_node;
             }
