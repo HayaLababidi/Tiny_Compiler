@@ -24,7 +24,7 @@ namespace JASON_Compiler
 
         public static Node Match(Token_Class expected_tok, List<Token> Tokens)
         {
-            if (expected_tok == Tokens[index].token_type)
+            if (index < Tokens.Count && expected_tok == Tokens[index].token_type)
             {
                 Node terminal = new Node();
                 terminal.token = Tokens[index];
@@ -33,15 +33,23 @@ namespace JASON_Compiler
             }
             else
             {
-                Errors.Parser_Error_List.Add("Expected " + expected_tok.ToString() + " ,found " + Tokens[index].token_type.ToString());
-                //if the token is a start of a new statement don't consume it // not so good try != next expected Passesd as parameter 
-                //works well when a token is missing but not so well when a token is written in the wrong place 
-                //keeps showing error until one of these words is found (hoping its the start of a new sentance)
-                if (!(Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeString || Tokens[index].token_type == Token_Class.End || 
-                   Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.Write || Tokens[index].token_type == Token_Class.Read || Tokens[index].token_type == Token_Class.Return || Tokens[index].token_type == Token_Class.If))
+                if (index < Tokens.Count)
                 {
-                    index++;
+                    Errors.Parser_Error_List.Add("Expected " + expected_tok.ToString() + " ,found " + Tokens[index].token_type.ToString());
+                    //if the token is a start of a new statement don't consume it // not so good try != next expected Passesd as parameter 
+                    //works well when a token is missing but not so well when a token is written in the wrong place 
+                    //keeps showing error until one of these words is found (hoping its the start of a new sentance)
+                    if (!(Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeString || Tokens[index].token_type == Token_Class.End ||
+                       Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.Write || Tokens[index].token_type == Token_Class.Read || Tokens[index].token_type == Token_Class.Return || Tokens[index].token_type == Token_Class.If))
+                    {
+                        index++;
+                    }
                 }
+                else
+                {
+                    Errors.Parser_Error_List.Add("Expected " + expected_tok.ToString() + "End of file found");
+                }
+
                 return null;
             }
         }
