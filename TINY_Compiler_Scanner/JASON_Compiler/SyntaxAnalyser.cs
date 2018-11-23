@@ -465,7 +465,7 @@ namespace JASON_Compiler
             return returned_node;
         }
 
-        //Assignment_statement → identifier Assignment_operator Expression
+        //Assignment_statement → identifier Assignment_operator Expression;
         public static Node Assignment_stmnt(List<Token> Tokens)
         {
 
@@ -475,7 +475,7 @@ namespace JASON_Compiler
             returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
             returned_node.children.Add(Assignment_op(Tokens));
             returned_node.children.Add(Expression(Tokens));
-
+            returned_node.children.Add(Match(Token_Class.Semicolon, Tokens));
             return returned_node;
         }
 
@@ -766,12 +766,12 @@ namespace JASON_Compiler
             return null;
         }
         
-        //Statements → Assignment_statement | Declaration_Statement| Write_Statement | Read_Statement | If_Statement | Repeat_Statement | Function_Call
-        public static Node Statements(List<Token> Tokens)
+        //Statement → Assignment_statement | Declaration_Statement| Write_Statement | Read_Statement | If_Statement | Repeat_Statement | Function_Call
+        public static Node Statement(List<Token> Tokens)
         {
             Node returned_node = new Node();
             returned_node.token = new Token();
-            returned_node.token.lex = "Statements";
+            returned_node.token.lex = "Statement";
             if (Tokens[index].token_type == Token_Class.Identifier && index + 1 < Tokens.Count && Tokens[index].token_type == Token_Class.LParanthesis)
                 returned_node.children.Add(Function_Call(Tokens));
             else if (Tokens[index].token_type == Token_Class.Identifier)
@@ -796,6 +796,23 @@ namespace JASON_Compiler
             return returned_node;
         }
         
+        //Statements → Statement Statements |  ε
+        public static Node Statements(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Statements";
+            if (Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeString ||
+                     Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.Write || Tokens[index].token_type == Token_Class.Read || Tokens[index].token_type == Token_Class.If || Tokens[index].token_type == Token_Class.Repeat)
+            {
+                returned_node.children.Add(Statement(Tokens));
+                returned_node.children.Add(Statements(Tokens));
+            }
+            else
+                return null;
+            return returned_node;
+        }
+
         //use this function to print the parse tree in TreeView Toolbox
         public static TreeNode PrintParseTree(Node root)
         {
