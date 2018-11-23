@@ -34,7 +34,14 @@ namespace JASON_Compiler
             else
             {
                 Errors.Parser_Error_List.Add("Expected " + expected_tok.ToString() + " ,found " + Tokens[index].token_type.ToString());
-                index++;
+                //if the token is a start of a new statement don't consume it // not so good try != next expected Passesd as parameter 
+                //works well when a token is missing but not so well when a token is written in the wrong place 
+                //keeps showing error until one of these words is found (hoping its the start of a new sentance)
+                if (!(Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeString || Tokens[index].token_type == Token_Class.End || 
+                   Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.Write || Tokens[index].token_type == Token_Class.Read || Tokens[index].token_type == Token_Class.Return || Tokens[index].token_type == Token_Class.If))
+                {
+                    index++;
+                }
                 return null;
             }
         }
@@ -56,6 +63,11 @@ namespace JASON_Compiler
             else if (Tokens[index].token_type == Token_Class.DataTypeString)
             {
                 returned_node.children.Add(Match(Token_Class.DataTypeString, Tokens));
+            }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected datatype ,found " + Tokens[index].token_type.ToString());
+                return null;
             }
             return returned_node;
         }
@@ -157,9 +169,15 @@ namespace JASON_Compiler
             {
                 returned_node.children.Add(Match(Token_Class.Endl, Tokens));
             }
-            else
+            else if (Tokens[index].token_type == Token_Class.String || Tokens[index].token_type == Token_Class.Number || Tokens[index].token_type == Token_Class.FloatNumber || Tokens[index].token_type == Token_Class.Identifier
+                    || Tokens[index].token_type == Token_Class.LParanthesis)
             {
                 returned_node.children.Add(Expression(Tokens));
+            }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected Expression ,found " + Tokens[index].token_type.ToString());
+                return null;
             }
             return returned_node;
         }
@@ -214,6 +232,11 @@ namespace JASON_Compiler
             {
                 returned_node.children.Add(Match(Token_Class.NotEqual, Tokens));
             }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected Condition Operator ,found " + Tokens[index].token_type.ToString());
+                return null;
+            }
             return returned_node;
         }
 
@@ -246,6 +269,11 @@ namespace JASON_Compiler
             {
                 returned_node.children.Add(Match(Token_Class.AndOp, Tokens));
             }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected Boolean Operator ,found " + Tokens[index].token_type.ToString());
+                return null;
+            }
             return returned_node;
         }
 
@@ -274,6 +302,11 @@ namespace JASON_Compiler
                     returned_node.children.Add(Match(Token_Class.Identifier, Tokens));//identifier 
                 }
             }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected number | floatnumber |identifier | Function_name ,found " + Tokens[index].token_type.ToString());
+                return null;
+            }
 
             return returned_node;
         }
@@ -298,6 +331,11 @@ namespace JASON_Compiler
             else if (Tokens[index].token_type == Token_Class.LParanthesis)//equation
             {
                 returned_node.children.Add(Equation(Tokens));
+            }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected string | Term | Equation ,found " + Tokens[index].token_type.ToString());
+                return null;
             }
 
             return returned_node;
@@ -346,9 +384,9 @@ namespace JASON_Compiler
                 returned_node.children.Add(Match(Token_Class.PlusOp, Tokens));
             }
             else
-            {
-                returned_node.token.lex = "ERROR";
-                return returned_node;
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected Add operator ,found " + Tokens[index].token_type.ToString());
+                return null;
             }
             return returned_node;
         }
@@ -368,9 +406,9 @@ namespace JASON_Compiler
                 returned_node.children.Add(Match(Token_Class.DivideOp, Tokens));
             }
             else
-            {
-                returned_node.token.lex = "ERROR";
-                return returned_node;
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected mulop ,found " + Tokens[index].token_type.ToString());
+                return null;
             }
             return returned_node;
         }
@@ -415,9 +453,14 @@ namespace JASON_Compiler
                 returned_node.children.Add(Equation(Tokens));
                 returned_node.children.Add(Match(Token_Class.RParanthesis, Tokens));
             }
-            else
+            else if (Tokens[index].token_type == Token_Class.Number || Tokens[index].token_type == Token_Class.FloatNumber || Tokens[index].token_type == Token_Class.Identifier)
             {
                 returned_node.children.Add(Term(Tokens));
+            }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected (Equation) | Term " + Tokens[index].token_type.ToString());
+                return null;
             }
             return returned_node;
         }
@@ -442,14 +485,13 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Assignment operator";
-            /*the index is the index of the token list not the code input*/
-            //index++;// cause match will only match to one of them 
             returned_node.children.Add(Match(Token_Class.AssignmentOp, Tokens));
             return returned_node;
         }
 
 
         //-----------------Yomna
+        //parameters --> Datatype identifier parameters'
         public static Node Prameters(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -461,6 +503,7 @@ namespace JASON_Compiler
             return returned_node;
         }
 
+        //parameters' → , Datatype identifier parameters' | ε
         public static Node Parametersdash(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -473,9 +516,12 @@ namespace JASON_Compiler
                 returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
                 returned_node.children.Add(Parametersdash(Tokens));
             }
+            else
+                return null;
             return returned_node;
         }
 
+        //Function_body → { Statements Return_Statement}
         public static Node Function_body(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -488,6 +534,7 @@ namespace JASON_Compiler
             return returned_node;
         }
 
+        //Function_ statement → Function_Declaration Function_body
         public static Node Function_statement(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -498,6 +545,7 @@ namespace JASON_Compiler
             return returned_node;
         }
 
+        //Main_Function → Datatype main () Function_Body
         public static Node Main_Function(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -511,6 +559,7 @@ namespace JASON_Compiler
             return returned_node;
         }
 
+        //Program→ Function_list Main_Function
         public static Node Program(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -521,6 +570,7 @@ namespace JASON_Compiler
             return returned_node;
         }
 
+        //Function_list → Function_ statement Function_list | ε
         public static Node Function_list(List<Token> Tokens)
         {
             Node returned_node = new Node();
@@ -588,11 +638,22 @@ namespace JASON_Compiler
             returned_node.token.lex = "Else_part";
 
             if (Tokens[index].token_type == Token_Class.Elseif)
+            {
                 returned_node.children.Add(Else_If_Statement(Tokens));
+            }
             else if (Tokens[index].token_type == Token_Class.Else)
+            {
                 returned_node.children.Add(Else_Statment(Tokens));
-            else
+            }
+            else if (Tokens[index].token_type == Token_Class.End)
+            {
                 returned_node.children.Add(Match(Token_Class.End, Tokens));
+            }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected Else_part of the if statement or END ,found " + Tokens[index].token_type.ToString());
+                return null;
+            }
 
             return returned_node;
         }
@@ -711,12 +772,14 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Statements";
-            if (Tokens[index].token_type == Token_Class.Identifier)
+            if (Tokens[index].token_type == Token_Class.Identifier && index + 1 < Tokens.Count && Tokens[index].token_type == Token_Class.LParanthesis)
+                returned_node.children.Add(Function_Call(Tokens));
+            else if (Tokens[index].token_type == Token_Class.Identifier)
                 returned_node.children.Add(Assignment_stmnt(Tokens));
             else if (Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeString ||
                      Tokens[index].token_type == Token_Class.DataTypeFloat)
                 returned_node.children.Add(DeclarationStatement(Tokens));
-           else if (Tokens[index].token_type == Token_Class.Write)
+            else if (Tokens[index].token_type == Token_Class.Write)
                 returned_node.children.Add(WriteStatement(Tokens));
             else if (Tokens[index].token_type == Token_Class.Read)
                 returned_node.children.Add(ReadStatement(Tokens));
@@ -724,8 +787,12 @@ namespace JASON_Compiler
                 returned_node.children.Add(If_Statement(Tokens));
             else if (Tokens[index].token_type == Token_Class.Repeat)
                 returned_node.children.Add(Repeat_Statement(Tokens));
-            else if (Tokens[index].token_type == Token_Class.Identifier)
-                returned_node.children.Add(Function_Call(Tokens));
+            else
+            {//does not consume token
+                if (Tokens[index].token_type != Token_Class.Return)
+                    Errors.Parser_Error_List.Add("Expected statement  ,found " + Tokens[index].token_type.ToString());
+                return null;
+            }
             return returned_node;
         }
         
