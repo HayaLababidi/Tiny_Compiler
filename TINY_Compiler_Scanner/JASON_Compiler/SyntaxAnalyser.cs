@@ -39,7 +39,7 @@ namespace JASON_Compiler
                     //if the token is a start of a new statement don't consume it // not so good try != next expected Passesd as parameter 
                     //works well when a token is missing but not so well when a token is written in the wrong place 
                     //keeps showing error until one of these words is found (hoping its the start of a new sentance)
-                    if (!(Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeString || Tokens[index].token_type == Token_Class.End ||
+                    if (!(Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.Void || Tokens[index].token_type == Token_Class.DataTypeString || Tokens[index].token_type == Token_Class.End || Tokens[index].token_type == Token_Class.Elseif ||  
                        Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.Write || Tokens[index].token_type == Token_Class.Read || Tokens[index].token_type == Token_Class.Return || Tokens[index].token_type == Token_Class.If))
                     {
                         index++;
@@ -72,6 +72,10 @@ namespace JASON_Compiler
             {
                 returned_node.children.Add(Match(Token_Class.DataTypeString, Tokens));
             }
+            else if (Tokens[index].token_type == Token_Class.Void)
+            {
+                returned_node.children.Add(Match(Token_Class.Void, Tokens));
+            }
             else
             {//does not consume token
                 Errors.Parser_Error_List.Add("Expected datatype ,found " + Tokens[index].token_type.ToString());
@@ -86,10 +90,17 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Declaration_Statement";
-            returned_node.children.Add(DataType(Tokens));
-            returned_node.children.Add(Declared_Var_list(Tokens));
-            returned_node.children.Add(Match(Token_Class.Semicolon, Tokens));
-
+            if (Tokens[index].token_type != Token_Class.Void)
+            {
+                returned_node.children.Add(DataType(Tokens));
+                returned_node.children.Add(Declared_Var_list(Tokens));
+                returned_node.children.Add(Match(Token_Class.Semicolon, Tokens));
+            }
+            else
+            {//does not consume token
+                Errors.Parser_Error_List.Add("Expected datatype ,Void is not acceptable datatype for variables");
+                return null;
+            }
             return returned_node;
         }
 
@@ -529,6 +540,18 @@ namespace JASON_Compiler
             return returned_node;
         }
 
+        //Function_body → { Statements}
+        public static Node Function_body_void(List<Token> Tokens)
+        {
+            Node returned_node = new Node();
+            returned_node.token = new Token();
+            returned_node.token.lex = "Void Function_body";
+            returned_node.children.Add(Match(Token_Class.LCurlyBraces, Tokens));
+            returned_node.children.Add(Statements(Tokens));
+            returned_node.children.Add(Match(Token_Class.RCurlyBraces, Tokens));
+            return returned_node;
+        }
+
         //Function_body → { Statements Return_Statement}
         public static Node Function_body(List<Token> Tokens)
         {
@@ -547,9 +570,19 @@ namespace JASON_Compiler
         {
             Node returned_node = new Node();
             returned_node.token = new Token();
+
             returned_node.token.lex = "Function_statement";
-            returned_node.children.Add(Function_Declaration(Tokens));
-            returned_node.children.Add(Function_body(Tokens));
+            if (Tokens[index].token_type == Token_Class.Void)
+            {
+
+                returned_node.children.Add(Function_Declaration(Tokens));
+                returned_node.children.Add(Function_body_void(Tokens));
+            }
+            else
+            {
+                returned_node.children.Add(Function_Declaration(Tokens));
+                returned_node.children.Add(Function_body(Tokens));
+            }
             return returned_node;
         }
 
@@ -584,7 +617,7 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Function_list";
-            if ((Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.DataTypeString) && index+1<Tokens.Count && Tokens[index + 1].token_type != Token_Class.Main)
+            if ((Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.Void || Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.DataTypeString) && index + 1 < Tokens.Count && Tokens[index + 1].token_type != Token_Class.Main)
             {
                 returned_node.children.Add(Function_statement(Tokens));
                 returned_node.children.Add(Function_list(Tokens));
@@ -780,7 +813,7 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Statement";
-            if (Tokens[index].token_type == Token_Class.Identifier && index + 1 < Tokens.Count && Tokens[index].token_type == Token_Class.LParanthesis)
+            if (Tokens[index].token_type == Token_Class.Identifier && index + 1 < Tokens.Count && Tokens[index+1].token_type == Token_Class.LParanthesis)
                 returned_node.children.Add(Function_Call(Tokens));
             else if (Tokens[index].token_type == Token_Class.Identifier)
                 returned_node.children.Add(Assignment_stmnt(Tokens));
@@ -810,7 +843,7 @@ namespace JASON_Compiler
             Node returned_node = new Node();
             returned_node.token = new Token();
             returned_node.token.lex = "Statements";
-            if (Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.DataTypeString ||
+            if (Tokens[index].token_type == Token_Class.Identifier || Tokens[index].token_type == Token_Class.DataTypeInt || Tokens[index].token_type == Token_Class.Void || Tokens[index].token_type == Token_Class.DataTypeString ||
                      Tokens[index].token_type == Token_Class.DataTypeFloat || Tokens[index].token_type == Token_Class.Write || Tokens[index].token_type == Token_Class.Read || Tokens[index].token_type == Token_Class.If || Tokens[index].token_type == Token_Class.Repeat)
             {
                 returned_node.children.Add(Statement(Tokens));

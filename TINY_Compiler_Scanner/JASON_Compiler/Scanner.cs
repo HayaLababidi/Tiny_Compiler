@@ -10,7 +10,7 @@ public enum Token_Class
     DataTypeInt, DataTypeFloat, DataTypeString, Read, Write, Repeat, Until, If, Elseif, Else, Then, Return, Endl, End, Main,
     Dot, Semicolon, Comma, LParanthesis, RParanthesis, LCurlyBraces, RCurlyBraces, OrOp,
     AndOp, AssignmentOp, NotEqual, IsEqual, LessThanOp, GreaterThanOp, PlusOp, MinusOp, MultiplyOp,
-    DivideOp, Number, Identifier, DoubleQuotes, String, comment, FloatNumber
+    DivideOp, Number, Identifier, DoubleQuotes, String, comment, FloatNumber,Void
 }
 namespace JASON_Compiler
 {
@@ -45,6 +45,8 @@ namespace JASON_Compiler
             ReservedWords.Add("endl", Token_Class.Endl);
             ReservedWords.Add("end", Token_Class.End);
             ReservedWords.Add("main", Token_Class.Main);
+            ReservedWords.Add("void", Token_Class.Void);
+
 
             Operators.Add(".", Token_Class.Dot);
             Operators.Add(";", Token_Class.Semicolon);
