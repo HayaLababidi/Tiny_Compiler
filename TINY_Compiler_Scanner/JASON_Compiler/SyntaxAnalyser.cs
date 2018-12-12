@@ -10,6 +10,9 @@ namespace JASON_Compiler
     public class Node
     {
         public List<Node> children = new List<Node>();
+        public int value = Int32.MinValue;
+        public string datatype = "";
+        public string Name;//to be deleted
         public Token token;
     }
     class SyntaxAnalyser
