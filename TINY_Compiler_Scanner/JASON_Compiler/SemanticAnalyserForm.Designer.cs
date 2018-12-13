@@ -28,31 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tabSymbol = new System.Windows.Forms.TabControl();
+            this.tabs = new System.Windows.Forms.TabControl();
             this.tabTree = new System.Windows.Forms.TabPage();
-            this.tabFunction = new System.Windows.Forms.TabPage();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
             this.treeView1 = new System.Windows.Forms.TreeView();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.dataGridView2 = new System.Windows.Forms.DataGridView();
-            this.tabSymbol.SuspendLayout();
+            this.tabFunction = new System.Windows.Forms.TabPage();
+            this.dgv_FunctionTable = new System.Windows.Forms.DataGridView();
+            this.tabSymbolTable = new System.Windows.Forms.TabPage();
+            this.dgv_SymbolTable = new System.Windows.Forms.DataGridView();
+            this.tabs.SuspendLayout();
             this.tabTree.SuspendLayout();
             this.tabFunction.SuspendLayout();
-            this.tabPage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_FunctionTable)).BeginInit();
+            this.tabSymbolTable.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_SymbolTable)).BeginInit();
             this.SuspendLayout();
             // 
-            // tabSymbol
+            // tabs
             // 
-            this.tabSymbol.Controls.Add(this.tabTree);
-            this.tabSymbol.Controls.Add(this.tabFunction);
-            this.tabSymbol.Controls.Add(this.tabPage3);
-            this.tabSymbol.Location = new System.Drawing.Point(3, 2);
-            this.tabSymbol.Name = "tabSymbol";
-            this.tabSymbol.SelectedIndex = 0;
-            this.tabSymbol.Size = new System.Drawing.Size(770, 600);
-            this.tabSymbol.TabIndex = 0;
+            this.tabs.Controls.Add(this.tabTree);
+            this.tabs.Controls.Add(this.tabFunction);
+            this.tabs.Controls.Add(this.tabSymbolTable);
+            this.tabs.Location = new System.Drawing.Point(3, 2);
+            this.tabs.Name = "tabs";
+            this.tabs.SelectedIndex = 0;
+            this.tabs.Size = new System.Drawing.Size(770, 600);
+            this.tabs.TabIndex = 0;
             // 
             // tabTree
             // 
@@ -62,30 +62,8 @@
             this.tabTree.Padding = new System.Windows.Forms.Padding(3);
             this.tabTree.Size = new System.Drawing.Size(762, 574);
             this.tabTree.TabIndex = 0;
-            this.tabTree.Text = "tabPage1";
+            this.tabTree.Text = "Annotated Tree";
             this.tabTree.UseVisualStyleBackColor = true;
-            // 
-            // tabFunction
-            // 
-            this.tabFunction.Controls.Add(this.dataGridView1);
-            this.tabFunction.Location = new System.Drawing.Point(4, 22);
-            this.tabFunction.Name = "tabFunction";
-            this.tabFunction.Padding = new System.Windows.Forms.Padding(3);
-            this.tabFunction.Size = new System.Drawing.Size(762, 574);
-            this.tabFunction.TabIndex = 1;
-            this.tabFunction.Text = "tabPage2";
-            this.tabFunction.UseVisualStyleBackColor = true;
-            // 
-            // tabPage3
-            // 
-            this.tabPage3.Controls.Add(this.dataGridView2);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(762, 574);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "tabPage3";
-            this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // treeView1
             // 
@@ -94,48 +72,70 @@
             this.treeView1.Size = new System.Drawing.Size(750, 562);
             this.treeView1.TabIndex = 1;
             // 
-            // dataGridView1
+            // tabFunction
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(6, 6);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(750, 562);
-            this.dataGridView1.TabIndex = 0;
+            this.tabFunction.Controls.Add(this.dgv_FunctionTable);
+            this.tabFunction.Location = new System.Drawing.Point(4, 22);
+            this.tabFunction.Name = "tabFunction";
+            this.tabFunction.Padding = new System.Windows.Forms.Padding(3);
+            this.tabFunction.Size = new System.Drawing.Size(762, 574);
+            this.tabFunction.TabIndex = 1;
+            this.tabFunction.Text = "Function Table";
+            this.tabFunction.UseVisualStyleBackColor = true;
             // 
-            // dataGridView2
+            // dgv_FunctionTable
             // 
-            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView2.Location = new System.Drawing.Point(6, 6);
-            this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.Size = new System.Drawing.Size(750, 562);
-            this.dataGridView2.TabIndex = 1;
+            this.dgv_FunctionTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_FunctionTable.Location = new System.Drawing.Point(6, 6);
+            this.dgv_FunctionTable.Name = "dgv_FunctionTable";
+            this.dgv_FunctionTable.Size = new System.Drawing.Size(750, 562);
+            this.dgv_FunctionTable.TabIndex = 0;
+            // 
+            // tabSymbolTable
+            // 
+            this.tabSymbolTable.Controls.Add(this.dgv_SymbolTable);
+            this.tabSymbolTable.Location = new System.Drawing.Point(4, 22);
+            this.tabSymbolTable.Name = "tabSymbolTable";
+            this.tabSymbolTable.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSymbolTable.Size = new System.Drawing.Size(762, 574);
+            this.tabSymbolTable.TabIndex = 2;
+            this.tabSymbolTable.Text = "Symbol Table";
+            this.tabSymbolTable.UseVisualStyleBackColor = true;
+            // 
+            // dgv_SymbolTable
+            // 
+            this.dgv_SymbolTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_SymbolTable.Location = new System.Drawing.Point(6, 6);
+            this.dgv_SymbolTable.Name = "dgv_SymbolTable";
+            this.dgv_SymbolTable.Size = new System.Drawing.Size(750, 562);
+            this.dgv_SymbolTable.TabIndex = 1;
             // 
             // SemanticAnalyserForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(776, 604);
-            this.Controls.Add(this.tabSymbol);
+            this.Controls.Add(this.tabs);
             this.Name = "SemanticAnalyserForm";
             this.Text = "SemanticAnalyserForm";
-            this.tabSymbol.ResumeLayout(false);
+            this.tabs.ResumeLayout(false);
             this.tabTree.ResumeLayout(false);
             this.tabFunction.ResumeLayout(false);
-            this.tabPage3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_FunctionTable)).EndInit();
+            this.tabSymbolTable.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_SymbolTable)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TabControl tabSymbol;
+        private System.Windows.Forms.TabControl tabs;
         private System.Windows.Forms.TabPage tabTree;
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.TabPage tabFunction;
-        private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.DataGridView dataGridView2;
+        private System.Windows.Forms.DataGridView dgv_FunctionTable;
+        private System.Windows.Forms.TabPage tabSymbolTable;
+        private System.Windows.Forms.DataGridView dgv_SymbolTable;
     }
 }

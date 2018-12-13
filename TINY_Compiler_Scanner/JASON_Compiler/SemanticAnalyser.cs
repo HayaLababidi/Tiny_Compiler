@@ -13,17 +13,127 @@ namespace JASON_Compiler
     {
         //            Dictionary<KeyValuePair<variable, scope>, List<KeyValuePair<attribute, value>>>  (ex:attribute is "datatype" or "value")                           
         public static Dictionary<KeyValuePair<string, string>, List<KeyValuePair<string, object>>> SymbolTable = new Dictionary<KeyValuePair<string,string>,List<KeyValuePair<string,object>>>();
+        //            Dictionary<funName,List<parameters<name, datatype>>> (num of parameters is the length of the list)
+        public static Dictionary<string, List<KeyValuePair<string, string>>> FunctionTable = new Dictionary<string,List<KeyValuePair<string,string>>>();
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////SEMANTIC CODE HERE///////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //p1_____________
+        /*  Declaration_Statement . Datatype Declared_Var_list;
+            Declared_Var . identifier Declared_Var’
+            Declared_Var’ . Assignment_op Expression | .
+            Declared_Vars . , Declared_Var Declared_Vars | .
+            Declared_Var_list . Declared_Var Declared_Vars
+        */
+        public static void handle_Main_Function(Node root)
+        {
+            root.children[4].scope = "main";//function body
+        }
+        public static void handle_Function_Statement(Node root)
+        {
+            root.children[1].scope = root.children[0].children[1].token.lex;//function body scope = function name
+        }
+        public static void handle_Function_body(Node root)
+        {
+            foreach (Node child in root.children)
+            {
+                child.scope = root.scope;
+            }
+        }
+        public static void handle_Statements(Node root)
+        {
+            root.children[0].children[0].scope = root.scope;
+            traverseTree(root.children[0].children[0]);
+            traverseTree(root.children[1]);
+            
+        }
+        public static void handle_Declaration_Statement(Node root)
+        {
+            root.children[0].datatype = root.children[0].children[0].token.lex;//Datatype
+            root.children[1].datatype = root.children[0].children[0].token.lex;//Declared_Var_list
+            root.children[1].scope = root.scope;
+            handle_Declared_Var_list(root.children[1]);
+        }
+        public static void handle_Declared_Var_list(Node root)
+        {
+
+            root.children[0].datatype = root.datatype;//Declared_Var
+            root.children[0].scope = root.scope;//Declared_Var
+            handle_Declared_Var(root.children[0]);
+            if (root.children.Count > 1)
+            {
+                root.children[1].datatype = root.datatype;//Declared_Vars
+                root.children[1].scope = root.scope;//Declared_Vars
+                handle_Declared_Vars(root.children[1]);
+            }
+        }
+        public static void handle_Declared_Vars(Node root)
+        {
+            root.children[1].datatype = root.datatype;//Declared_Var
+            root.children[1].scope = root.scope;//Declared_Var
+            handle_Declared_Var(root.children[1]);
+            if (root.children.Count > 2)
+            {
+                root.children[2].datatype = root.datatype;//Declared_Vars
+                root.children[2].scope = root.scope;//Declared_Vars
+                handle_Declared_Vars(root.children[2]);
+            }
+        }
+        public static void handle_Declared_Var(Node root)
+        {
+
+            root.children[0].datatype = root.datatype;//identifier
+            root.children[0].scope = root.scope;
+            KeyValuePair<string, string> var = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
+            List<KeyValuePair<string, object>> prop=new List<KeyValuePair<string,object>>();
+            prop.Add(new KeyValuePair<string,object>("Datatype",root.datatype));
+            if (SymbolTable.ContainsKey(var))
+            {
+                Errors.Analyser_Error_List.Add("A local variable named " + var.Key + " is already defined in this scope");
+            }
+            else
+            {
+                SymbolTable.Add(var,prop);
+            }
+            if (root.children.Count > 1)
+            {
+                root.children[1].datatype = root.datatype;//Declared_Var’
+                object value=handle_Declared_Var_Dash(root.children[1]);
+                if (value != null)
+                {
+                    SymbolTable[var].Add(new KeyValuePair<string, object>("Value", value));
+                }
+            }
+        }
+        public static object handle_Declared_Var_Dash(Node root) 
+        {
+            KeyValuePair<string, object> Assignedvalue = EvaluateExpression(root.children[1]);//expression
+            if (Assignedvalue.Key == root.datatype)
+            {
+                if (Assignedvalue.Value != null)
+                {
+                    return Assignedvalue.Value;
+                }
+            }
+            else
+            {
+                Errors.Analyser_Error_List.Add("Data type of Expression is not the same as Declared Variable dataType");
+            }
+            return null;
+        }
         //endP1
         
         //p2_____________
         public static void handleIdentifier(Node root) { }
         public static void handleTerm(Node root) { }
+
+        //variables of type object can accept values of any data type (the value)
+        //string is must be the datatype 
+        //if the value can't be computed return null (for example expression=var and var does not have a value)
+        public static KeyValuePair<string, object> EvaluateExpression/*get value*/(Node root)//must evaluate the value of the expression and its datatype
+        { return new KeyValuePair<string, object>(); }
 
         //public static void getValue(Node root) { }//dont handle strings ;int /real only 
 
@@ -206,46 +316,13 @@ namespace JASON_Compiler
 
         //endMai-p3
 
-        //this section was already here 
-        public static void handleidlist(Node root)
-        {
-            List<KeyValuePair<string, object>> DicList = new List<KeyValuePair<string, object>>();
-            DicList.Add(new KeyValuePair<string, object>("DataType", root.datatype));
-            if (root.children[0].Name.ToLower() == "idlist")
-            {
-                root.children[0].datatype = root.datatype;
-                handleidlist(root.children[0]);
-                root.children[2].datatype = root.datatype;
-                SymbolTable.Add(root.children[2].Name, DicList);
-            }
-            else
-            {
-                root.children[0].datatype = root.datatype;
-                SymbolTable.Add(root.children[0].Name, DicList);
-            }
 
-        }
-        public static void handleVardecl(Node root)
-        {
-            root.children[0].datatype = root.children[0].children[0].Name;
-            root.children[1].datatype = root.children[0].children[0].Name;
-            handleidlist(root.children[1]);
-        }
-        //public static void handleparamdecl(Node root)
-        //{
-        //    root.datatype = root.children[0].children[0].Name;
-        //}
         public static void traverseTree(Node root)
         {
             if (root.Name.ToLower() == "vardecl")
             {
-                handleVardecl(root);
+                
             }
-            //else if (root.Name.ToLower() == "param decl")
-            //{
-            //    handleparamdecl(root);
-            //}
-
             else
             {
                 foreach (Node child in root.children)
