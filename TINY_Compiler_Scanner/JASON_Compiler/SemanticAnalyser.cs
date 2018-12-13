@@ -31,14 +31,14 @@ namespace JASON_Compiler
 
         //Mai-p3_____________
         /*
-        Condition_Statement → Condition Boolean_Exp
+        
         Boolean_Exp → Boolean_Operator Condition Boolean_Exp | ε
         If_Statement → if Condition_Statement then Statements Else_part
         Else_part → Else_If_Statment | Else_Statment | end
         Else_If_Statement → elseif Condition_Statement then Statements Else_part
         Else_Statment → else Statements end
         Repeat_Statement→ repeat Statements until Condition_Statement*/
-        public static void handelCondition(Node root)
+        public static void handleCondition(Node root)
         {//Condition → Identifier Condition_Operator Term 
             Node identifier = root.children[0];
             Node rightHS = root.children[2];
@@ -109,10 +109,79 @@ namespace JASON_Compiler
                         break;
                     default:
                         string error = "wrong operator";
-                        Errors.Analyser_Error_List.Add(string.Format(error, Cond_op.token.lex));
+                        Errors.Analyser_Error_List.Add(error);
                         break;
                 }
                 
+            }
+        }
+        public static void handleCondition_Statement(Node condition_statment)
+        {//Condition_Statement → Condition Boolean_Exp
+         // x==5    (|| y==7 && z>5)
+            Node condition = condition_statment.children[0];
+            Node boolean_exp = condition_statment.children[1];
+            handleCondition(condition);
+            handleBool_Exp(boolean_exp);
+            evaluateCondition_Statement(condition_statment);
+            //check if it actually works 
+        }
+        public static void handleBool_Exp(Node boolean_exp)
+        {   // x==5       ||        y==7      &&    z>5
+            // condition  0operator 1condition  2.0oprator 2.1condition  ε
+            //boolean_opertor || condition y==7 boolean expression &&z>5
+            if (boolean_exp.children.Count>0)
+            {//Boolean_Exp → Boolean_Operator Condition Boolean_Exp
+                handleCondition(boolean_exp.children[1]);
+                handleBool_Exp(boolean_exp.children[2]);
+                string child_boolean_operator = boolean_exp.children[2].children[0].token.lex;
+                bool condition = boolean_exp.children[1].value == 1 ? true : false;
+                bool child_condition = boolean_exp.children[2].children[1].value == 1 ? true : false;
+                bool value;
+                switch (child_boolean_operator)
+                {
+                    case "||":
+                        value = condition || child_condition;
+                        boolean_exp.value = value == true ? 1 : 0;
+                        break;
+                    case "&&":
+                        value = condition && child_condition;
+                        boolean_exp.value = value == true ? 1 : 0;
+                        break;
+                    default:
+                        string error = "wrong operator :{0} should be a boolean operator";
+                        Errors.Analyser_Error_List.Add(string.Format(error, child_boolean_operator));
+                        break;
+                }
+
+            }
+            //else Boolean_Exp →ε
+
+        }
+        public static void evaluateCondition_Statement(Node condition_statment)
+        {
+            // x==5    (|| y==7 && z>5)
+            //Boolean_Exp → Boolean_Operator Condition Boolean_Exp | ε
+            //boolean_opertor || condition y==7 boolean expression &&z>5
+            Node boolean_exp = condition_statment.children[1];
+            string boolean_operator = boolean_exp.children[0].token.lex;
+            bool bool_expval = boolean_exp.value == 1 ? true : false;
+            bool conditionval = condition_statment.children[0].value == 1 ? true : false;
+            bool value;//=true;
+            switch (boolean_operator)
+            {
+                case "||":
+                    value = conditionval|| (bool_expval);
+                    condition_statment.value = value == true ? 1 : 0;
+                    break;
+                case "&&":
+                    value = conditionval && (bool_expval);
+                    condition_statment.value = value == true ? 1 : 0;
+                    break;
+                default:
+                    string error = "wrong operator :{0} should be a boolean operator";
+                    Errors.Analyser_Error_List.Add(string.Format(error,boolean_operator));
+                    break;
+
             }
         }
         //endMai-p3
