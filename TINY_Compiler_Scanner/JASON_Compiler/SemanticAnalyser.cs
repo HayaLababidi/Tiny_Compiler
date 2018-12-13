@@ -22,28 +22,24 @@ namespace JASON_Compiler
         //endP1
         
         //p2_____________
-        public static void handelIdentifier(Node root) { }
-        public static void handelTerm(Node root) { }
+        public static void handleIdentifier(Node root) { }
+        public static void handleTerm(Node root) { }
 
-        //public static void getValue(Node root) { }//dont handel strings ;int /real only 
+        //public static void getValue(Node root) { }//dont handle strings ;int /real only 
 
         //endP2
 
         //Mai-p3_____________
         /*
-        
-        Boolean_Exp → Boolean_Operator Condition Boolean_Exp | ε
-        If_Statement → if Condition_Statement then Statements Else_part
-        Else_part → Else_If_Statment | Else_Statment | end
-        Else_If_Statement → elseif Condition_Statement then Statements Else_part
+
         Else_Statment → else Statements end
         Repeat_Statement→ repeat Statements until Condition_Statement*/
         public static void handleCondition(Node root)
         {//Condition → Identifier Condition_Operator Term 
             Node identifier = root.children[0];
             Node rightHS = root.children[2];
-            handelIdentifier(identifier);
-            handelTerm(rightHS);
+            handleIdentifier(identifier);
+            handleTerm(rightHS);
             if (rightHS.datatype == identifier.datatype)
             {
                 root.datatype = identifier.datatype;
@@ -184,17 +180,37 @@ namespace JASON_Compiler
 
             }
         }
+        public static void handleIf(Node root)
+        {//If_Statement → if Condition_Statement then Statements Else_part
+            handleCondition_Statement(root.children[1]);
+            handleElse_Part(root.children[4]);
+                //else part
+        }
+        public static void handleElse_Part(Node else_part)
+        {// Else_part → Else_If_Statment | Else_Statment | end
+            if (else_part.children[0].children[0].token.lex=="elseif")
+            {
+                handleElse_if_statment(else_part.children[0]);
+            }
+            
+        }
+        public static void handleElse_if_statment(Node elseifstatment)
+        {// Else_If_Statement → elseif Condition_Statement then Statements Else_part
+            handleCondition_Statement(elseifstatment.children[1]);
+            handleElse_Part(elseifstatment.children[4]);
+        }
+
         //endMai-p3
 
         //this section was already here 
-        public static void handelidlist(Node root)
+        public static void handleidlist(Node root)
         {
             List<KeyValuePair<string, object>> DicList = new List<KeyValuePair<string, object>>();
             DicList.Add(new KeyValuePair<string, object>("DataType", root.datatype));
             if (root.children[0].Name.ToLower() == "idlist")
             {
                 root.children[0].datatype = root.datatype;
-                handelidlist(root.children[0]);
+                handleidlist(root.children[0]);
                 root.children[2].datatype = root.datatype;
                 SymbolTable.Add(root.children[2].Name, DicList);
             }
@@ -205,13 +221,13 @@ namespace JASON_Compiler
             }
 
         }
-        public static void handelVardecl(Node root)
+        public static void handleVardecl(Node root)
         {
             root.children[0].datatype = root.children[0].children[0].Name;
             root.children[1].datatype = root.children[0].children[0].Name;
-            handelidlist(root.children[1]);
+            handleidlist(root.children[1]);
         }
-        //public static void handelparamdecl(Node root)
+        //public static void handleparamdecl(Node root)
         //{
         //    root.datatype = root.children[0].children[0].Name;
         //}
@@ -219,11 +235,11 @@ namespace JASON_Compiler
         {
             if (root.Name.ToLower() == "vardecl")
             {
-                handelVardecl(root);
+                handleVardecl(root);
             }
             //else if (root.Name.ToLower() == "param decl")
             //{
-            //    handelparamdecl(root);
+            //    handleparamdecl(root);
             //}
 
             else
