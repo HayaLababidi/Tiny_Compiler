@@ -33,7 +33,7 @@ namespace JASON_Compiler
         /*
 
         Else_Statment → else Statements end
-        Repeat_Statement→ repeat Statements until Condition_Statement*/
+        */
         public static void handleCondition(Node root)
         {//Condition → Identifier Condition_Operator Term 
             Node identifier = root.children[0];
@@ -198,6 +198,10 @@ namespace JASON_Compiler
         {// Else_If_Statement → elseif Condition_Statement then Statements Else_part
             handleCondition_Statement(elseifstatment.children[1]);
             handleElse_Part(elseifstatment.children[4]);
+        }
+        public static void handleRepeat_Statement(Node elseifstatment)
+        {//Repeat_Statement→ repeat Statements until Condition_Statement
+            handleCondition_Statement(elseifstatment.children[3]);
         }
 
         //endMai-p3
