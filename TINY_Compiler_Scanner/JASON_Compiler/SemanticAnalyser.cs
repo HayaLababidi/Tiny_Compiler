@@ -18,6 +18,106 @@ namespace JASON_Compiler
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////SEMANTIC CODE HERE///////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //p1_____________
+        //endP1
+        
+        //p2_____________
+        public static void handelIdentifier(Node root) { }
+        public static void handelTerm(Node root) { }
+
+        //public static void getValue(Node root) { }//dont handel strings ;int /real only 
+
+        //endP2
+
+        //Mai-p3_____________
+        /*
+        Condition_Statement → Condition Boolean_Exp
+        Boolean_Exp → Boolean_Operator Condition Boolean_Exp | ε
+        If_Statement → if Condition_Statement then Statements Else_part
+        Else_part → Else_If_Statment | Else_Statment | end
+        Else_If_Statement → elseif Condition_Statement then Statements Else_part
+        Else_Statment → else Statements end
+        Repeat_Statement→ repeat Statements until Condition_Statement*/
+        public static void handelCondition(Node root)
+        {//Condition → Identifier Condition_Operator Term 
+            Node identifier = root.children[0];
+            Node rightHS = root.children[2];
+            handelIdentifier(identifier);
+            handelTerm(rightHS);
+            if (rightHS.datatype == identifier.datatype)
+            {
+                root.datatype = identifier.datatype;
+                //setting the value   
+                evaluateCondition(root);
+            }
+            else
+            {
+                string error = @"wrong data type:can't compare {0} {1} (left hand side) to {2} right hand side ";
+                Errors.Analyser_Error_List.Add(string.Format(error, identifier.datatype ,identifier.token.lex,root , rightHS.datatype));
+            }
+        }
+        public static void evaluateCondition(Node condition)
+        {//true/false
+            Node Cond_op = condition.children[1];
+            Node RHS = condition.children[0];
+            Node LHS = condition.children[2];
+            bool boolvalue = true;
+            if (condition.datatype == "string")
+            {
+                switch (Cond_op.token.lex)
+                {
+                    case "<>":
+                        boolvalue = LHS.token.lex != RHS.token.lex;
+                        condition.value = boolvalue == true ? 1 : 0;
+                        //if boolvalue=true condition.value=1 else 0 
+                        break;
+
+                    case "=":
+                        boolvalue = LHS.token.lex == RHS.token.lex;
+                        condition.value = boolvalue == true ? 1 : 0;
+                        break;
+
+                    default:
+                        string error = "operator {0} can't be used with string condtion";
+                        Errors.Analyser_Error_List.Add(string.Format(error, Cond_op.token.lex));
+                        break;
+                }
+                 
+                
+            }
+            else//real / string 
+            {
+                switch (Cond_op.token.lex)
+                {
+                    case "<>":
+                        boolvalue = LHS.value != RHS.value;
+                        condition.value = boolvalue == true ? 1 : 0;
+                        break;
+
+                    case "=":
+                        boolvalue = LHS.value == RHS.value;
+                        condition.value = boolvalue == true ? 1 : 0;
+                        break;
+
+                    case ">":
+                        boolvalue = LHS.value > RHS.value;
+                        condition.value = boolvalue == true ? 1 : 0;
+                        break;
+                    case "<":
+                        boolvalue = LHS.value < RHS.value;
+                        condition.value = boolvalue == true ? 1 : 0;
+                        break;
+                    default:
+                        string error = "wrong operator";
+                        Errors.Analyser_Error_List.Add(string.Format(error, Cond_op.token.lex));
+                        break;
+                }
+                
+            }
+        }
+        //endMai-p3
+
+        //this section was already here 
         public static void handelidlist(Node root)
         {
             List<KeyValuePair<string, object>> DicList = new List<KeyValuePair<string, object>>();

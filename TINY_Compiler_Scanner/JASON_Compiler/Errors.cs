@@ -10,5 +10,7 @@ namespace JASON_Compiler
     {
         public static List<string> Scanner_Error_List = new List<string>();
         public static List<string> Parser_Error_List = new List<string>();
+        public static List<string> Analyser_Error_List = new List<string>();
+
     }
 }
