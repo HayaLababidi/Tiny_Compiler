@@ -157,11 +157,103 @@ namespace JASON_Compiler
             return null;
         }
         //endP1
-        
-        //p2_____________
-        public static void handleIdentifier(Node root) { }
-        public static void handleTerm(Node root) { }
 
+        # region p2_____________
+        public static void handleIdentifier(Node root)
+        {
+            //give value to identifier
+            if (root.token.lex == "Assignment statement")
+                root.children[0].value = handle_Expression(root.children[2]);
+            else if (root.children[0].token.token_type == Token_Class.Identifier)
+                ;
+        }
+
+        //Expression → string | Term | Equation
+        public static object handle_Expression(Node root)
+        {
+            object val = new object();
+
+            if (root.children[0].token.lex == "Term")
+            {
+                val = handleTerm(root.children[0]);
+            }
+
+            else if (root.children[0].token.lex == "Equation")
+            {
+                val = handle_Equation(root.children[0]);
+            }
+
+            else if (root.children[0].token.token_type == Token_Class.String)
+            {
+                val = root.children[0].token.lex;
+            }
+
+            return val;
+        }
+
+        //Term → number | floatnumber |identifier | Function_Call
+        public static object handleTerm(Node root)
+        {
+            object val = new object();
+
+            if (root.children[0].token.lex == "Function_Call")
+            {
+                val = handle_Function_Call(root.children[0]);
+            }
+
+            else if (root.children[0].token.token_type == Token_Class.Identifier)
+            {
+                if (SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
+                {
+                    handleIdentifier(root);
+                }
+                else
+                    Errors.Analyser_Error_List.Add("Variable not found");
+            }
+
+            else if (root.children[0].token.token_type == Token_Class.Number)
+            {
+                val = root.children[0].token.lex;
+                //root.value = root.children[0].token.lex;
+            }
+
+            else if (root.children[0].token.token_type == Token_Class.FloatNumber)
+            {
+                val = root.children[0].token.lex;
+            }
+
+            return val;
+        }
+
+        public static object handle_Function_Call(Node root)
+        {
+            object val = new object();
+
+
+
+            return val;
+        }
+
+        //Assignment_statement → identifier Assignment_operator Expression
+        public static void handle_Assignment_statement(Node root)
+        {
+            if (SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
+            {
+                handleIdentifier(root);
+            }
+            else
+                Errors.Analyser_Error_List.Add("Variable not found");
+
+            root.children[0].value = handle_Expression(root.children[2]);
+        }
+
+        public static object handle_Equation(Node root)
+        {
+            object val = new object();
+
+
+            return val;
+        }
         //variables of type object can accept values of any data type (the value)
         //string is must be the datatype 
         //if the value can't be computed return null (for example expression=var and var does not have a value)
@@ -171,6 +263,7 @@ namespace JASON_Compiler
         //public static void getValue(Node root) { }//dont handle strings ;int /real only 
 
         //endP2
+        # endregion
 
         //Mai-p3_____________
         /*
