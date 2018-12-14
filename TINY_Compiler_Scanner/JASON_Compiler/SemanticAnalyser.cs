@@ -30,6 +30,7 @@ namespace JASON_Compiler
         public static void handle_Main_Function(Node root)
         {
             root.children[4].scope = "main";//function body
+            handle_Function_body(root.children[4]);
         }
         public static void handle_Function_Statement(Node root)
         {
@@ -41,6 +42,7 @@ namespace JASON_Compiler
             {
                 child.scope = root.scope;
             }
+            handle_Statements(root.children[1]);
         }
         public static void handle_Statements(Node root)
         {
@@ -167,20 +169,17 @@ namespace JASON_Compiler
             Node Cond_op = condition.children[1];
             Node RHS = condition.children[0];
             Node LHS = condition.children[2];
-            bool boolvalue = true;
             if (condition.datatype == "string")
             {
                 switch (Cond_op.token.lex)
                 {
                     case "<>":
-                        boolvalue = LHS.token.lex != RHS.token.lex;
-                        condition.value = boolvalue == true ? 1 : 0;
+                        condition.value = (bool)(LHS.token.lex != RHS.token.lex);
                         //if boolvalue=true condition.value=1 else 0 
                         break;
 
                     case "=":
-                        boolvalue = LHS.token.lex == RHS.token.lex;
-                        condition.value = boolvalue == true ? 1 : 0;
+                        condition.value = (bool)(LHS.token.lex == RHS.token.lex);
                         break;
 
                     default:
@@ -196,22 +195,18 @@ namespace JASON_Compiler
                 switch (Cond_op.token.lex)
                 {
                     case "<>":
-                        boolvalue = LHS.value != RHS.value;
-                        condition.value = boolvalue == true ? 1 : 0;
+                        condition.value = (bool)(LHS.value != RHS.value);
                         break;
 
                     case "=":
-                        boolvalue = LHS.value == RHS.value;
-                        condition.value = boolvalue == true ? 1 : 0;
+                        condition.value = (bool)(LHS.value == RHS.value);
                         break;
 
                     case ">":
-                        boolvalue = LHS.value > RHS.value;
-                        condition.value = boolvalue == true ? 1 : 0;
+                        condition.value = (bool)((float)LHS.value > (float)RHS.value);
                         break;
                     case "<":
-                        boolvalue = LHS.value < RHS.value;
-                        condition.value = boolvalue == true ? 1 : 0;
+                        condition.value = (bool)((float)LHS.value < (float)RHS.value);
                         break;
                     default:
                         string error = "wrong operator";
@@ -235,13 +230,13 @@ namespace JASON_Compiler
         {   // x==5       ||        y==7      &&    z>5
             // condition  0operator 1condition  2.0oprator 2.1condition  ε
             //boolean_opertor || condition y==7 boolean expression &&z>5
-            if (boolean_exp.children.Count>0)
+            if (boolean_exp.children[0]!=null)
             {//Boolean_Exp → Boolean_Operator Condition Boolean_Exp
                 handleCondition(boolean_exp.children[1]);
                 handleBool_Exp(boolean_exp.children[2]);
                 string child_boolean_operator = boolean_exp.children[2].children[0].token.lex;
-                bool condition = boolean_exp.children[1].value == 1 ? true : false;
-                bool child_condition = boolean_exp.children[2].children[1].value == 1 ? true : false;
+                bool condition = (bool)boolean_exp.children[1].value;
+                bool child_condition = (bool)boolean_exp.children[2].children[1].value;
                 bool value;
                 switch (child_boolean_operator)
                 {
@@ -270,8 +265,8 @@ namespace JASON_Compiler
             //boolean_opertor || condition y==7 boolean expression &&z>5
             Node boolean_exp = condition_statment.children[1];
             string boolean_operator = boolean_exp.children[0].token.lex;
-            bool bool_expval = boolean_exp.value == 1 ? true : false;
-            bool conditionval = condition_statment.children[0].value == 1 ? true : false;
+            bool bool_expval = (bool)boolean_exp.value;
+            bool conditionval = (bool)condition_statment.children[0].value;
             bool value;//=true;
             switch (boolean_operator)
             {
@@ -323,6 +318,10 @@ namespace JASON_Compiler
             {
                 handle_Declaration_Statement(root);
             }
+            else if (root.token.lex.ToLower() == "main_function")
+            {
+                handle_Main_Function(root);
+            }
             else
             {
                 foreach (Node child in root.children)
@@ -355,11 +354,11 @@ namespace JASON_Compiler
                 return null;
 
             TreeNode tree;
-            if (root.value == Int32.MinValue && root.datatype == "")
+            if (root.value == null && root.datatype == "")
                 tree = new TreeNode(root.token.lex);
-            else if (root.value != Int32.MinValue && root.datatype == "")
+            else if (root.value != null && root.datatype == "")
                 tree = new TreeNode(root.token.lex + " & its value is: " + root.value);
-            else if (root.value == Int32.MinValue && root.datatype != "")
+            else if (root.value == null && root.datatype != "")
                 tree = new TreeNode(root.token.lex + " & its datatype is: " + root.datatype);
             else
                 tree = new TreeNode(root.token.lex + " & its value is: " + root.value + " & datatype is: " + root.datatype);

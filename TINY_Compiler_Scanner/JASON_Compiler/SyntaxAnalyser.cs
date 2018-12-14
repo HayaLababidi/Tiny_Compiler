@@ -10,7 +10,7 @@ namespace JASON_Compiler
     public class Node
     {
         public List<Node> children = new List<Node>();
-        public float value = Int32.MinValue;
+        public object value=null ;
         public string datatype = "";
         public string scope = "";
         public string Name;//to be deleted
