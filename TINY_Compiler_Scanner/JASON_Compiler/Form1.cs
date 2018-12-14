@@ -94,8 +94,15 @@ namespace JASON_Compiler
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Parser_Form parse = new Parser_Form();
-            parse.Show();
+            //Parser_Form parse = new Parser_Form();
+            SemanticAnalyserForm SemAnalysis = new SemanticAnalyserForm();
+            //parse.Show();
+            SemAnalysis.Show();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
         /*  void PrintLexemes()
 {

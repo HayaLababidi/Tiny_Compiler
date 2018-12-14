@@ -62,7 +62,7 @@ namespace JASON_Compiler
             root.children[0].datatype = root.datatype;//Declared_Var
             root.children[0].scope = root.scope;//Declared_Var
             handle_Declared_Var(root.children[0]);
-            if (root.children.Count > 1)
+            if (root.children[1] != null)
             {
                 root.children[1].datatype = root.datatype;//Declared_Vars
                 root.children[1].scope = root.scope;//Declared_Vars
@@ -74,7 +74,7 @@ namespace JASON_Compiler
             root.children[1].datatype = root.datatype;//Declared_Var
             root.children[1].scope = root.scope;//Declared_Var
             handle_Declared_Var(root.children[1]);
-            if (root.children.Count > 2)
+            if (root.children[2]!=null)
             {
                 root.children[2].datatype = root.datatype;//Declared_Vars
                 root.children[2].scope = root.scope;//Declared_Vars
@@ -97,7 +97,7 @@ namespace JASON_Compiler
             {
                 SymbolTable.Add(var,prop);
             }
-            if (root.children.Count > 1)
+            if (root.children[1]!=null)
             {
                 root.children[1].datatype = root.datatype;//Declared_Var’
                 object value=handle_Declared_Var_Dash(root.children[1]);
@@ -319,15 +319,18 @@ namespace JASON_Compiler
 
         public static void traverseTree(Node root)
         {
-            if (root.Name.ToLower() == "vardecl")
+            if (root.token.lex.ToLower() == "declaration_statement")
             {
-                
+                handle_Declaration_Statement(root);
             }
             else
             {
                 foreach (Node child in root.children)
                 {
-                    traverseTree(child);
+                    if (child != null)
+                    {
+                        traverseTree(child);
+                    }
                 }
             }
 
@@ -353,13 +356,13 @@ namespace JASON_Compiler
 
             TreeNode tree;
             if (root.value == Int32.MinValue && root.datatype == "")
-                tree = new TreeNode(root.Name);
+                tree = new TreeNode(root.token.lex);
             else if (root.value != Int32.MinValue && root.datatype == "")
-                tree = new TreeNode(root.Name + " & its value is: " + root.value);
+                tree = new TreeNode(root.token.lex + " & its value is: " + root.value);
             else if (root.value == Int32.MinValue && root.datatype != "")
-                tree = new TreeNode(root.Name + " & its datatype is: " + root.datatype);
+                tree = new TreeNode(root.token.lex + " & its datatype is: " + root.datatype);
             else
-                tree = new TreeNode(root.Name + " & its value is: " + root.value + " & datatype is: " + root.datatype);
+                tree = new TreeNode(root.token.lex + " & its value is: " + root.value + " & datatype is: " + root.datatype);
             tree.Expand();
             if (root.children.Count == 0)
                 return tree;

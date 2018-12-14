@@ -34,13 +34,12 @@
             this.tabFunction = new System.Windows.Forms.TabPage();
             this.dgv_FunctionTable = new System.Windows.Forms.DataGridView();
             this.tabSymbolTable = new System.Windows.Forms.TabPage();
-            this.dgv_SymbolTable = new System.Windows.Forms.DataGridView();
+            this.listBox1 = new System.Windows.Forms.ListBox();
             this.tabs.SuspendLayout();
             this.tabTree.SuspendLayout();
             this.tabFunction.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_FunctionTable)).BeginInit();
             this.tabSymbolTable.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_SymbolTable)).BeginInit();
             this.SuspendLayout();
             // 
             // tabs
@@ -93,7 +92,7 @@
             // 
             // tabSymbolTable
             // 
-            this.tabSymbolTable.Controls.Add(this.dgv_SymbolTable);
+            this.tabSymbolTable.Controls.Add(this.listBox1);
             this.tabSymbolTable.Location = new System.Drawing.Point(4, 22);
             this.tabSymbolTable.Name = "tabSymbolTable";
             this.tabSymbolTable.Padding = new System.Windows.Forms.Padding(3);
@@ -102,13 +101,13 @@
             this.tabSymbolTable.Text = "Symbol Table";
             this.tabSymbolTable.UseVisualStyleBackColor = true;
             // 
-            // dgv_SymbolTable
+            // listBox1
             // 
-            this.dgv_SymbolTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv_SymbolTable.Location = new System.Drawing.Point(6, 6);
-            this.dgv_SymbolTable.Name = "dgv_SymbolTable";
-            this.dgv_SymbolTable.Size = new System.Drawing.Size(750, 562);
-            this.dgv_SymbolTable.TabIndex = 1;
+            this.listBox1.FormattingEnabled = true;
+            this.listBox1.Location = new System.Drawing.Point(3, 3);
+            this.listBox1.Name = "listBox1";
+            this.listBox1.Size = new System.Drawing.Size(753, 563);
+            this.listBox1.TabIndex = 0;
             // 
             // SemanticAnalyserForm
             // 
@@ -118,12 +117,12 @@
             this.Controls.Add(this.tabs);
             this.Name = "SemanticAnalyserForm";
             this.Text = "SemanticAnalyserForm";
+            this.Load += new System.EventHandler(this.SemanticAnalyserForm_Load);
             this.tabs.ResumeLayout(false);
             this.tabTree.ResumeLayout(false);
             this.tabFunction.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgv_FunctionTable)).EndInit();
             this.tabSymbolTable.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgv_SymbolTable)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -136,6 +135,6 @@
         private System.Windows.Forms.TabPage tabFunction;
         private System.Windows.Forms.DataGridView dgv_FunctionTable;
         private System.Windows.Forms.TabPage tabSymbolTable;
-        private System.Windows.Forms.DataGridView dgv_SymbolTable;
+        private System.Windows.Forms.ListBox listBox1;
     }
 }
