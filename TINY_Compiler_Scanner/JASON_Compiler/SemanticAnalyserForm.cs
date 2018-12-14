@@ -34,6 +34,29 @@ namespace JASON_Compiler
                 }
                 listBox1.Items.Add(val);
             }
+            /*
+            foreach (var item in SemanticAnalyser.FunctionTable)
+            {
+                string val = "Varible: " + item.Key.Key + "\t\tScope: " + item.Key.Value;
+                if (item.Key.Key.Length == 1)
+                {
+                    val = "Varible: " + item.Key.Key + " " + "\t\tScope: " + item.Key.Value;
+                }
+                foreach (var i in item.Value)
+                {
+                    val = val + "\t\t" + i.Key + " = " + i.Value;
+                }
+                listBox1.Items.Add(val);
+            }*/
+            PrintErrors();
+        }
+        void PrintErrors()
+        {
+            for (int i = 0; i < Errors.Analyser_Error_List.Count; i++)
+            {
+                textBox2.Text += "ERROR " + Convert.ToString(i + 1) + ": " + Errors.Analyser_Error_List[i];
+                textBox2.AppendText(Environment.NewLine);
+            }
         }
     }
 }

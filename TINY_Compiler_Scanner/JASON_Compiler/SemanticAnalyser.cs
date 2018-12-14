@@ -47,8 +47,39 @@ namespace JASON_Compiler
         public static void handle_Statements(Node root)
         {
             root.children[0].children[0].scope = root.scope;
-            traverseTree(root.children[0].children[0]);
-            traverseTree(root.children[1]);
+            if (root.children[0].children[0].token.lex.ToLower() == "declaration_statement")
+            {
+                handle_Declaration_Statement(root.children[0].children[0]);
+            }
+            else if (root.children[0].children[0].token.lex.ToLower() == "assignment_statement")
+            {
+                //Assignmentstatment
+            }
+            else if (root.children[0].children[0].token.lex.ToLower() == "write_statement")
+            {
+                //write_statement
+            }
+            else if (root.children[0].children[0].token.lex.ToLower() == "read_statement")
+            {
+                //read_statement
+            }
+            else if (root.children[0].children[0].token.lex.ToLower() == "if_statement")
+            {
+                handleIf(root.children[0].children[0]);
+            }
+            else if (root.children[0].children[0].token.lex.ToLower() == "repeat_statement")
+            {
+                handleRepeat_Statement(root.children[0].children[0]);
+            }
+            else if (root.children[0].children[0].token.lex.ToLower() == "function_call")
+            {
+                //function_call
+            }
+            if (root.children[1] != null)
+            {
+                root.children[1].scope = root.scope;
+                handle_Statements(root.children[1]);
+            }
             
         }
         public static void handle_Declaration_Statement(Node root)
@@ -222,8 +253,15 @@ namespace JASON_Compiler
             Node condition = condition_statment.children[0];
             Node boolean_exp = condition_statment.children[1];
             handleCondition(condition);
-            handleBool_Exp(boolean_exp);
-            evaluateCondition_Statement(condition_statment);
+            if (boolean_exp != null)
+            {
+                handleBool_Exp(boolean_exp);
+                evaluateCondition_Statement(condition_statment);
+            }
+            else
+            {
+                condition_statment.value = condition.value;
+            }
             //check if it actually works 
         }
         public static void handleBool_Exp(Node boolean_exp)
@@ -272,11 +310,11 @@ namespace JASON_Compiler
             {
                 case "||":
                     value = conditionval|| (bool_expval);
-                    condition_statment.value = value == true ? 1 : 0;
+                    condition_statment.value = value;
                     break;
                 case "&&":
                     value = conditionval && (bool_expval);
-                    condition_statment.value = value == true ? 1 : 0;
+                    condition_statment.value = value;
                     break;
                 default:
                     string error = "wrong operator :{0} should be a boolean operator";
@@ -314,11 +352,11 @@ namespace JASON_Compiler
 
         public static void traverseTree(Node root)
         {
-            if (root.token.lex.ToLower() == "declaration_statement")
+            /*if (root.token.lex.ToLower() == "function_list")
             {
                 handle_Declaration_Statement(root);
             }
-            else if (root.token.lex.ToLower() == "main_function")
+            else */if (root.token.lex.ToLower() == "main_function")
             {
                 handle_Main_Function(root);
             }
@@ -326,7 +364,7 @@ namespace JASON_Compiler
             {
                 foreach (Node child in root.children)
                 {
-                    if (child != null)
+                    if (child != null) 
                     {
                         traverseTree(child);
                     }
