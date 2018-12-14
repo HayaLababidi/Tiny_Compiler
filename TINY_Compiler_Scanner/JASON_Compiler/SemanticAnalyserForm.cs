@@ -34,6 +34,19 @@ namespace JASON_Compiler
                 }
                 listBox1.Items.Add(val);
             }
+            listBox2.Items.Add("Function Table:");
+            foreach (var item in SemanticAnalyser.FunctionTable)
+            {
+                string val = "Function Name: " + item.Key + "\t\tDatatype: " + item.Value.datatype + "\t\tParameters: ";
+                if (item.Value.numOFparam > 0)
+                {
+                    foreach (var i in item.Value.parameters)
+                    {
+                        val = val + "\t" + i;
+                    }
+                }
+                listBox2.Items.Add(val);
+            }
             /*
             foreach (var item in SemanticAnalyser.FunctionTable)
             {
@@ -57,6 +70,11 @@ namespace JASON_Compiler
                 textBox2.Text += "ERROR " + Convert.ToString(i + 1) + ": " + Errors.Analyser_Error_List[i];
                 textBox2.AppendText(Environment.NewLine);
             }
+        }
+
+        private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -11,10 +11,16 @@ namespace JASON_Compiler
 
     class SemanticAnalyser
     {
+        public struct functionTableValue
+        {
+            public string datatype;
+            public List<KeyValuePair<string, string>> parameters;
+            public int numOFparam;
+        }
         //            Dictionary<KeyValuePair<variable, scope>, List<KeyValuePair<attribute, value>>>  (ex:attribute is "datatype" or "value")                           
         public static Dictionary<KeyValuePair<string, string>, List<KeyValuePair<string, object>>> SymbolTable = new Dictionary<KeyValuePair<string,string>,List<KeyValuePair<string,object>>>();
         //            Dictionary<funName,List<parameters<name, datatype>>> (num of parameters is the length of the list)
-        public static Dictionary<string, List<KeyValuePair<string, string>>> FunctionTable = new Dictionary<string,List<KeyValuePair<string,string>>>();
+        public static Dictionary<string, functionTableValue> FunctionTable = new Dictionary<string, functionTableValue>();
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +37,15 @@ namespace JASON_Compiler
         {
             root.children[4].scope = "main";//function body
             handle_Function_body(root.children[4]);
+
+            functionTableValue value = new functionTableValue();
+            string funName = root.children[1].token.lex;
+            value.datatype = root.children[1].datatype;
+            value.numOFparam = 0;
+            if (!FunctionTable.ContainsKey(funName))
+                FunctionTable.Add(funName, value);
+            else
+                Errors.Analyser_Error_List.Add(funName + " Already declared function");
         }
         public static void handle_Function_Statement(Node root)
         {
@@ -441,6 +456,69 @@ namespace JASON_Compiler
         }
 
         //endMai-p3
+        //p4
+        public static void handle_function_declaration(Node root)
+        {
+            root.children[0].datatype = root.children[0].children[0].token.lex;
+            root.children[1].datatype = root.children[0].children[0].token.lex;
+
+
+            functionTableValue value = new functionTableValue();
+            List<KeyValuePair<string, string>> param = new List<KeyValuePair<string, string>>();
+            string funName = root.children[1].token.lex;
+            value.datatype = root.children[1].datatype;
+
+            if (root.children[3] != null)
+            {
+                param = handle_parameters(root.children[3]);
+                value.parameters = param;
+                value.numOFparam = param.Count();
+            }
+            else
+            {
+                value.numOFparam = 0;
+            }
+            if (!FunctionTable.ContainsKey(funName))
+                FunctionTable.Add(funName, value);
+            else
+                Errors.Analyser_Error_List.Add(funName + " Already declared function");
+        }
+        public static List<KeyValuePair<string, string>> handle_parameters(Node root)
+        {
+            root.children[0].datatype = root.children[0].children[0].token.lex;
+            root.children[1].datatype = root.children[0].children[0].token.lex;
+            List<KeyValuePair<string, string>> param = new List<KeyValuePair<string, string>>();
+            param.Add(new KeyValuePair<string, string>(root.children[1].token.lex, root.children[1].datatype));
+            if (root.children[2] != null)
+            {
+                param.Add(handle_parametersdash(root.children[2]));
+
+            }
+
+            return param;
+        }
+        public static KeyValuePair<string, string> handle_parametersdash(Node root)
+        {
+            root.children[1].datatype = root.children[1].children[0].token.lex;
+            root.children[2].datatype = root.children[1].children[0].token.lex;
+            if (root.children[3] != null)
+            {
+                handle_parametersdash(root.children[3]);
+            }
+            KeyValuePair<string, string> param;
+            param = new KeyValuePair<string, string>(root.children[2].token.lex, root.children[2].datatype);
+            return param;
+        }
+        public static void handle_function_call(Node root)
+        {
+            if (FunctionTable.ContainsKey(root.children[0].token.lex))
+            {
+
+            }
+            else
+                Errors.Analyser_Error_List.Add(root.children[0].token.lex + " Undeclared function");
+        }
+        //end p4
 
 
         public static void traverseTree(Node root)
@@ -452,6 +530,14 @@ namespace JASON_Compiler
             else */if (root.token.lex.ToLower() == "main_function")
             {
                 handle_Main_Function(root);
+            }
+            else if (root.token.lex.ToLower() == "function_declaration")
+            {
+                handle_function_declaration(root);
+            }
+            else if (root.token.lex.ToLower() == "function_call")
+            {
+                handle_function_call(root);
             }
             else
             {
