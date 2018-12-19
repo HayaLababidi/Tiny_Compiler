@@ -25,7 +25,7 @@ namespace JASON_Compiler
     {
         public List<Token> Tokens = new List<Token>();
         Dictionary<string, Token_Class> ReservedWords = new Dictionary<string, Token_Class>();
-        Dictionary<string, Token_Class> Operators = new Dictionary<string, Token_Class>();
+        public Dictionary<string, Token_Class> Operators = new Dictionary<string, Token_Class>();
         bool end;
 
         public Scanner()
