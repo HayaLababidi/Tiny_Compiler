@@ -36,7 +36,16 @@ namespace JASON_Compiler
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////SEMANTIC CODE HERE///////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# region p1_____________
+        //utitlity function 
+        static void setscope(Node root) 
+        {
+            for (int i = 0; i < root.children.Count; i++)
+            {
+                if (root.children[i] != null)
+                    root.children[i].scope = root.scope;
+            }
+        }
+        # region p1_____________
         /*  Declaration_Statement . Datatype Declared_Var_list;
             Declared_Var . identifier Declared_Var’
             Declared_Var’ . Assignment_op Expression | .
@@ -198,8 +207,13 @@ namespace JASON_Compiler
             {
                 if (element.Key == "Value")
                     val.value = element.Value;
+                if (element.Key == "datatype")
+                    val.datatype = element.Value;
             }
-            val.datatype = "identifier";
+            root.value = val.value;
+            root.datatype =  val.datatype.ToString();
+            //root.children[0].value=val.value;
+            //val.datatype = "identifier";
             return val;
         }
 
@@ -250,17 +264,19 @@ namespace JASON_Compiler
 
             else if (root.children[0].token.token_type == Token_Class.Number)
             {
-                val.value = root.children[0].token.lex;
+                val.value =int.Parse(root.children[0].token.lex);
                 val.datatype = "int";
                 
             }
 
             else if (root.children[0].token.token_type == Token_Class.FloatNumber)
             {
-                val.value = root.children[0].token.lex;
+                val.value = float.Parse( root.children[0].token.lex);
                 val.datatype = "float";
             }
 
+            root.value = val.value;
+            root.datatype = (string)val.datatype;
             return val;
         }
 
@@ -799,11 +815,7 @@ namespace JASON_Compiler
             return val;
         }
 
-
-     
-
         
-
         //variables of type object can accept values of any data type (the value)
         //string is must be the datatype 
         //if the value can't be computed return null (for example expression=var and var does not have a value)
@@ -813,9 +825,8 @@ namespace JASON_Compiler
         //public static void getValue(Node root) { }//dont handle strings ;int /real only 
 
         //endP2
-        # endregion
-
-        //Mai-p3_____________
+        #endregion
+        #region Mai-p3_____________
         /*
 
         Else_Statment → else Statements end
@@ -824,8 +835,8 @@ namespace JASON_Compiler
         {//Condition → Identifier Condition_Operator Term 
             Node identifier = root.children[0];
             Node rightHS = root.children[2];
-            handle_Identifier(identifier);
-            handleTerm(rightHS);
+            handle_Identifier(identifier);//neglecting the return since it fills itin root //Value_Type id = handle_Identifier(identifier);
+            rightHS.value = handleTerm(rightHS);
             if (rightHS.datatype == identifier.datatype)
             {
                 root.datatype = identifier.datatype;
@@ -990,8 +1001,8 @@ namespace JASON_Compiler
             handleCondition_Statement(elseifstatment.children[3]);
         }
 
-        //endMai-p3
-        //p4
+        #endregion Mai-p3
+        #region p4
         public static void handle_function_declaration(Node root)
         {
             root.children[0].datatype = root.children[0].children[0].token.lex;
@@ -1123,7 +1134,7 @@ namespace JASON_Compiler
             paramType = handle_Expression(root.children[1]);
             return paramType;
         }
-        //end p4
+        # endregion
 
 
         public static void traverseTree(Node root)

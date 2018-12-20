@@ -131,3 +131,15 @@ E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\
 E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Properties.Resources.resources
 E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.SemanticAnalyserForm.resources
 E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe.config
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.exe
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.pdb
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.exe
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\bin\Debug\JASON_Compiler.pdb
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csprojResolveAssemblyReference.cache
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Form1.resources
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Form2.resources
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Parser_Form.resources
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Properties.Resources.resources
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.SemanticAnalyserForm.resources
+D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
