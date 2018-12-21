@@ -45,6 +45,7 @@ namespace JASON_Compiler
                     root.children[i].scope = root.scope;
             }
         }
+
         # region p1_____________
         /*  Declaration_Statement . Datatype Declared_Var_list;
             Declared_Var . identifier Declared_Var’
@@ -52,6 +53,7 @@ namespace JASON_Compiler
             Declared_Vars . , Declared_Var Declared_Vars | .
             Declared_Var_list . Declared_Var Declared_Vars
         */
+
         public static void handle_Main_Function(Node root)
         {
             root.children[4].scope = "main";//function body
@@ -66,32 +68,50 @@ namespace JASON_Compiler
             else
                 Errors.Analyser_Error_List.Add(funName + " Already declared function");
         }
+
         public static void handle_Function_Statement(Node root)
         {
-            root.children[1].scope = root.children[0].children[1].token.lex;//function body scope = function name
-            foreach (Node child in root.children)
-            {
-                child.scope = root.scope;
-            }
+            root.scope = root.children[0].children[1].token.lex;//function body scope = function name
+            root.datatype = root.children[0].children[0].children[0].token.lex;
+            root.children[1].datatype = root.datatype;
+            setscope(root);
+            handle_function_declaration(root.children[0]);//H
+            handle_Function_body(root.children[1]);//H
         }
         public static void handle_Function_body(Node root)
         {
-            foreach (Node child in root.children)
+            setscope(root);
+            if (root.children[1]!=null)
             {
-                child.scope = root.scope;
+                handle_Statements(root.children[1]);
+                if(root.datatype !="void")
+                {
+                    handle_Function_return(root.children[2]);
+                }
             }
-            handle_Statements(root.children[1]);
+            else
+            {
+                if (root.datatype != "void")
+                {
+                    handle_Function_return(root.children[2]);
+                }
+            }
+        }
+        public static void handle_Function_return(Node root)
+        {
+            
         }
         public static void handle_Statements(Node root)
         {
             root.children[0].children[0].scope = root.scope;
+            setscope(root.children[0].children[0]);
             if (root.children[0].children[0].token.lex.ToLower() == "declaration_statement")
             {
                 handle_Declaration_Statement(root.children[0].children[0]);
             }
             else if (root.children[0].children[0].token.lex.ToLower() == "assignment_statement")
             {
-                //Assignmentstatment
+                handle_Assignment_statement(root.children[0].children[0]);
             }
             else if (root.children[0].children[0].token.lex.ToLower() == "write_statement")
             {
@@ -111,7 +131,7 @@ namespace JASON_Compiler
             }
             else if (root.children[0].children[0].token.lex.ToLower() == "function_call")
             {
-                //function_call
+                handle_function_call(root.children[0].children[0]);
             }
             if (root.children[1] != null)
             {
@@ -120,6 +140,7 @@ namespace JASON_Compiler
             }
             
         }
+
         public static void handle_Declaration_Statement(Node root)
         {
             root.children[0].datatype = root.children[0].children[0].token.lex;//Datatype
@@ -127,6 +148,7 @@ namespace JASON_Compiler
             root.children[1].scope = root.scope;
             handle_Declared_Var_list(root.children[1]);
         }
+
         public static void handle_Declared_Var_list(Node root)
         {
 
@@ -152,6 +174,7 @@ namespace JASON_Compiler
                 handle_Declared_Vars(root.children[2]);
             }
         }
+
         public static void handle_Declared_Var(Node root)
         {
 
@@ -178,6 +201,7 @@ namespace JASON_Compiler
                 }
             }
         }
+
         public static object handle_Declared_Var_Dash(Node root) 
         {
             KeyValuePair<string, object> Assignedvalue = EvaluateExpression(root.children[1]);//expression
@@ -194,27 +218,39 @@ namespace JASON_Compiler
             }
             return null;
         }
+
         //endP1
 # endregion
+
         # region p2_____________
         public static Value_Type handle_Identifier(Node root)
         {
             Value_Type val = new Value_Type();
-            KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
+            //KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
+            KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.token.lex, root.scope);//H
             List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-            attributes = SymbolTable[list_key];
-            foreach (KeyValuePair<string, object> element in attributes)
+            if (SymbolTable.ContainsKey(list_key))//H //make sure key exist
             {
-                if (element.Key == "Value")
-                    val.value = element.Value;
-                if (element.Key == "datatype")
-                    val.datatype = element.Value;
+                attributes = SymbolTable[list_key];
+                foreach (KeyValuePair<string, object> element in attributes)
+                {
+                    if (element.Key == "Value")
+                        val.value = element.Value;
+                    if (element.Key == "Datatype")
+                        val.datatype = element.Value;
+                }
+                root.value = val.value;
+                root.datatype = val.datatype.ToString();
+                //root.children[0].value=val.value;
+                //val.datatype = "identifier";
+                return val;
             }
-            root.value = val.value;
-            root.datatype =  val.datatype.ToString();
-            //root.children[0].value=val.value;
-            //val.datatype = "identifier";
-            return val;
+            else//H
+            {
+                Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
+                return null;
+            }
+            
         }
 
         //Expression → string | Term | Equation
@@ -259,7 +295,7 @@ namespace JASON_Compiler
                     val = handle_Identifier(root);   
                 }
                 else
-                    Errors.Analyser_Error_List.Add("Variable not found");
+                    Errors.Analyser_Error_List.Add("Variable " + root.children[0].token.lex + " not found");
             }
 
             else if (root.children[0].token.token_type == Token_Class.Number)
@@ -833,6 +869,7 @@ namespace JASON_Compiler
         */
         public static void handleCondition(Node root)
         {//Condition → Identifier Condition_Operator Term 
+            setscope(root);//H
             Node identifier = root.children[0];
             Node rightHS = root.children[2];
             handle_Identifier(identifier);//neglecting the return since it fills itin root //Value_Type id = handle_Identifier(identifier);
@@ -904,6 +941,7 @@ namespace JASON_Compiler
         public static void handleCondition_Statement(Node condition_statment)
         {//Condition_Statement → Condition Boolean_Exp
          // x==5    (|| y==7 && z>5)
+            setscope(condition_statment);
             Node condition = condition_statment.children[0];
             Node boolean_exp = condition_statment.children[1];
             handleCondition(condition);
@@ -922,30 +960,45 @@ namespace JASON_Compiler
         {   // x==5       ||        y==7      &&    z>5
             // condition  0operator 1condition  2.0oprator 2.1condition  ε
             //boolean_opertor || condition y==7 boolean expression &&z>5
-            if (boolean_exp.children[0]!=null)
-            {//Boolean_Exp → Boolean_Operator Condition Boolean_Exp
+            if (boolean_exp.children[0] != null)
+            {//Boolean_Exp → Boolean_Operator Condition Boolean_Exp |ε
                 handleCondition(boolean_exp.children[1]);
-                handleBool_Exp(boolean_exp.children[2]);
-                string child_boolean_operator = boolean_exp.children[2].children[0].token.lex;
-                bool condition = (bool)boolean_exp.children[1].value;
-                bool child_condition = (bool)boolean_exp.children[2].children[1].value;
-                bool value;
-                switch (child_boolean_operator)
+                //bool value;//H
+                if (boolean_exp.children[1].value != null)//H   // Can't Evaluate the value during compile time 
                 {
-                    case "||":
-                        value = condition || child_condition;
-                        boolean_exp.value = value == true ? 1 : 0;
-                        break;
-                    case "&&":
-                        value = condition && child_condition;
-                        boolean_exp.value = value == true ? 1 : 0;
-                        break;
-                    default:
-                        string error = "wrong operator :{0} should be a boolean operator";
-                        Errors.Analyser_Error_List.Add(string.Format(error, child_boolean_operator));
-                        break;
+                    bool condition = (bool)boolean_exp.children[1].value;
+                    if (boolean_exp.children[2] != null)//H
+                    {
+                        handleBool_Exp(boolean_exp.children[2]);
+                        string child_boolean_operator = boolean_exp.children[2].children[0].token.lex;
+                        bool child_condition = (bool)boolean_exp.children[2].children[1].value;
+                        switch (child_boolean_operator)
+                        {
+                            case "||":
+                                //value = condition || child_condition; //H
+                                //boolean_exp.value = value == true ? 1 : 0;//H
+                                boolean_exp.value = condition || child_condition;//H
+                                break;
+                            case "&&":
+                                //value = condition && child_condition;//H
+                                //boolean_exp.value = value == true ? 1 : 0;//H
+                                boolean_exp.value = condition && child_condition;//H
+                                break;
+                            default:
+                                string error = "wrong operator :{0} should be a boolean operator";
+                                Errors.Analyser_Error_List.Add(string.Format(error, child_boolean_operator));
+                                break;
+                        }
+                    }
+                    else//H //eventually boolean_exp will be null
+                    {
+                        boolean_exp.value = condition;//H
+                    }
                 }
-
+                else//H
+                {
+                    boolean_exp.value = null;
+                }
             }
             //else Boolean_Exp →ε
 
@@ -957,48 +1010,78 @@ namespace JASON_Compiler
             //boolean_opertor || condition y==7 boolean expression &&z>5
             Node boolean_exp = condition_statment.children[1];
             string boolean_operator = boolean_exp.children[0].token.lex;
-            bool bool_expval = (bool)boolean_exp.value;
-            bool conditionval = (bool)condition_statment.children[0].value;
-            bool value;//=true;
-            switch (boolean_operator)
+            if (boolean_exp.value != null && condition_statment.children[0].value != null)//H //can be null so the the condition_statment value is null
             {
-                case "||":
-                    value = conditionval|| (bool_expval);
-                    condition_statment.value = value;
-                    break;
-                case "&&":
-                    value = conditionval && (bool_expval);
-                    condition_statment.value = value;
-                    break;
-                default:
-                    string error = "wrong operator :{0} should be a boolean operator";
-                    Errors.Analyser_Error_List.Add(string.Format(error,boolean_operator));
-                    break;
+                bool bool_expval = (bool)boolean_exp.value;
+                bool conditionval = (bool)condition_statment.children[0].value;
+                bool value;//=true;
+                switch (boolean_operator)
+                {
+                    case "||":
+                        value = conditionval || (bool_expval);
+                        condition_statment.value = value;
+                        break;
+                    case "&&":
+                        value = conditionval && (bool_expval);
+                        condition_statment.value = value;
+                        break;
+                    default:
+                        string error = "wrong operator :{0} should be a boolean operator";
+                        Errors.Analyser_Error_List.Add(string.Format(error, boolean_operator));
+                        break;
 
+                }
+            }
+            else//H
+            {
+                condition_statment.value = null;
             }
         }
         public static void handleIf(Node root)
         {//If_Statement → if Condition_Statement then Statements Else_part
+            root.scope = root.scope + "_If";//H
+            setscope(root);//H
             handleCondition_Statement(root.children[1]);
+            handle_Statements(root.children[3]);//H
             handleElse_Part(root.children[4]);
                 //else part
         }
         public static void handleElse_Part(Node else_part)
         {// Else_part → Else_If_Statment | Else_Statment | end
+            setscope(else_part);//H
             if (else_part.children[0].children[0].token.lex=="elseif")
             {
+                else_part.scope = else_part.scope + "_ElseIF";//H
                 handleElse_if_statment(else_part.children[0]);
             }
-            
+            else if (else_part.children[0].children[0].token.lex == "else")//H
+            {
+                else_part.scope = else_part.scope + "_Else";//H
+                handleElse_statment(else_part.children[0]);
+            }
+            else if (else_part.children[0].children[0].token.lex == "end")//H
+            {
+                handleEnd_Part(else_part.children[0]);
+            }
+        }
+        public static void handleElse_statment(Node elsestatment)//H
+        {// Else_Statment → else Statements end
+            setscope(elsestatment);//H
+            handle_Statements(elsestatment.children[1]);
+            handleEnd_Part(elsestatment.children[2]);
+        }
+        public static void handleEnd_Part(Node root)//H
+        {
+            //remove variables from symbol table
         }
         public static void handleElse_if_statment(Node elseifstatment)
         {// Else_If_Statement → elseif Condition_Statement then Statements Else_part
             handleCondition_Statement(elseifstatment.children[1]);
             handleElse_Part(elseifstatment.children[4]);
         }
-        public static void handleRepeat_Statement(Node elseifstatment)
+        public static void handleRepeat_Statement(Node root)
         {//Repeat_Statement→ repeat Statements until Condition_Statement
-            handleCondition_Statement(elseifstatment.children[3]);
+            handleCondition_Statement(root.children[3]);
         }
 
         #endregion Mai-p3
@@ -1139,23 +1222,21 @@ namespace JASON_Compiler
 
         public static void traverseTree(Node root)
         {
-            /*if (root.token.lex.ToLower() == "function_list")
+            if (root.token.lex.ToLower() == "function_list")
             {
-                handle_Declaration_Statement(root);
+                foreach (Node child in root.children)
+                {
+                    if (child != null)
+                    {
+                        handle_Function_Statement(child);
+                    }
+                }
             }
-            else */if (root.token.lex.ToLower() == "main_function")
+            else if (root.token.lex.ToLower() == "main_function")
             {
                 handle_Main_Function(root);
             }
-            else if (root.token.lex.ToLower() == "function_declaration")
-            {
-                handle_function_declaration(root);
-            }
-            else if (root.token.lex.ToLower() == "function_call")
-            {
-                handle_function_call(root);
-            }
-            else
+            /*else
             {
                 foreach (Node child in root.children)
                 {
@@ -1164,7 +1245,7 @@ namespace JASON_Compiler
                         traverseTree(child);
                     }
                 }
-            }
+            }*/
 
         }
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

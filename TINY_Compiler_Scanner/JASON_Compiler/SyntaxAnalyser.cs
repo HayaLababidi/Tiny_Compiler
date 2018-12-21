@@ -880,6 +880,7 @@ namespace JASON_Compiler
                     continue;
                 tree.Nodes.Add(PrintTree(child));
             }
+            tree.Expand();
             return tree;
         }
     }
