@@ -115,7 +115,7 @@ namespace JASON_Compiler
             }
             else if (root.children[0].children[0].token.lex.ToLower() == "write_statement")
             {
-                //write_statement
+                handle_Write(root.children[0].children[0]);
             }
             else if (root.children[0].children[0].token.lex.ToLower() == "read_statement")
             {
@@ -220,7 +220,24 @@ namespace JASON_Compiler
             }
             return null;
         }
-
+        public static void handle_Write(Node root)
+        {
+            setscope(root);
+            if (root.children[1].children[0].token.token_type == Token_Class.Endl)
+            {
+                root.children[1].value = root.children[1].children[0].token.lex;
+            }
+            else//expression
+            {
+                setscope(root.children[1]);
+                Value_Type ret =handle_Expression(root.children[1].children[0]);
+                if (ret != null)
+                {
+                    root.children[1].value = ret.value;
+                    root.children[1].datatype = (string)ret.datatype;
+                }
+            }
+        }
         //endP1
 # endregion
 
@@ -258,6 +275,7 @@ namespace JASON_Compiler
         //Expression → string | Term | Equation
         public static Value_Type handle_Expression(Node root)
         {
+            setscope(root);
             // call when want to get value and data type of expression
             Value_Type val = new Value_Type();
 
@@ -284,7 +302,7 @@ namespace JASON_Compiler
         public static Value_Type handleTerm(Node root)
         {
             Value_Type val = new Value_Type();
-
+            setscope(root);
             if (root.children[0].token.lex == "Function_Call")
             {
                 //val = handle_Function_Call(root.children[0]);
@@ -294,7 +312,8 @@ namespace JASON_Compiler
             {
                 if (SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
                 {
-                    val = handle_Identifier(root);   
+                    //val = handle_Identifier(root);   
+                    val = handle_Identifier(root.children[0]);//H   
                 }
                 else
                     Errors.Analyser_Error_List.Add("Variable " + root.children[0].token.lex + " not found");
@@ -312,9 +331,11 @@ namespace JASON_Compiler
                 val.value = float.Parse( root.children[0].token.lex);
                 val.datatype = "float";
             }
-
-            root.value = val.value;
-            root.datatype = (string)val.datatype;
+            if (val != null)//H
+            {
+                root.value = val.value;
+                root.datatype = (string)val.datatype;
+            }
             return val;
         }
 
@@ -862,6 +883,8 @@ namespace JASON_Compiler
                     attributes.Add(set_val);
                 }
                 //attributes[0] = set_val;//H
+                root.children[0].datatype = (string)returned_Exp.datatype;
+                root.children[0].value = returned_Exp.value;
             }
         }
 
