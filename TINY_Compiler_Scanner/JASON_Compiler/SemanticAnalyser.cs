@@ -45,7 +45,10 @@ namespace JASON_Compiler
                     root.children[i].scope = root.scope;
             }
         }
-
+        static bool sameScope(string parentscope, string currentscope)
+        {
+            return currentscope.StartsWith(parentscope);
+        }
         # region p1_____________
         /*  Declaration_Statement . Datatype Declared_Var_list;
             Declared_Var . identifier Declared_Var’
@@ -86,6 +89,7 @@ namespace JASON_Compiler
                 handle_Statements(root.children[1]);
                 if(root.datatype !="void")
                 {
+                    root.children[2].datatype = root.datatype;
                     handle_Function_return(root.children[2]);
                 }
             }
@@ -93,13 +97,24 @@ namespace JASON_Compiler
             {
                 if (root.datatype != "void")
                 {
+                    root.children[2].datatype = root.datatype;
                     handle_Function_return(root.children[2]);
                 }
             }
         }
         public static void handle_Function_return(Node root)
         {
-            
+            setscope(root);
+            setscope(root.children[1]);
+            Value_Type ret = handle_Expression(root.children[1]);
+            if (ret != null)
+            {
+                root.children[1].value = ret.value;
+            }
+            if (root.datatype != (string)ret.datatype)
+            {
+                Errors.Analyser_Error_List.Add(root.children[1].datatype + " return datatype incompatible" + (string)ret.datatype);
+            }
         }
         public static void handle_Statements(Node root)
         {
@@ -238,6 +253,7 @@ namespace JASON_Compiler
                 }
             }
         }
+
         //endP1
 # endregion
 
