@@ -109,7 +109,7 @@ namespace JASON_Compiler
             {
                 handle_Declaration_Statement(root.children[0].children[0]);
             }
-            else if (root.children[0].children[0].token.lex.ToLower() == "assignment_statement")
+            else if (root.children[0].children[0].token.lex.ToLower() == "assignment statement")
             {
                 handle_Assignment_statement(root.children[0].children[0]);
             }
@@ -198,18 +198,20 @@ namespace JASON_Compiler
                 if (value != null)
                 {
                     SymbolTable[var].Add(new KeyValuePair<string, object>("Value", value));
+                    root.children[0].value = value;
                 }
             }
         }
 
         public static object handle_Declared_Var_Dash(Node root) 
         {
-            KeyValuePair<string, object> Assignedvalue = EvaluateExpression(root.children[1]);//expression
-            if (Assignedvalue.Key == root.datatype)
+            Value_Type returned_Exp = handle_Expression(root.children[1]);
+
+            if (returned_Exp.datatype.ToString().ToLower() == root.datatype.ToString().ToLower())
             {
-                if (Assignedvalue.Value != null)
+                if (returned_Exp.value != null)
                 {
-                    return Assignedvalue.Value;
+                    return returned_Exp.value;
                 }
             }
             else
@@ -829,15 +831,38 @@ namespace JASON_Compiler
         {
             if (!SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
             {
-                Errors.Analyser_Error_List.Add("Variable not found");
+                //Errors.Analyser_Error_List.Add("Variable not found");
+                Errors.Analyser_Error_List.Add(root.children[0].token.lex + " Variable not found (undeclared)");//H
             }
-
-            KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
-            List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-            attributes = SymbolTable[list_key];
-            var set_val = new KeyValuePair<string,object>("Value",handle_Expression(root.children[2]).value);
-            attributes[0] = set_val;
-            
+            else//H
+            {
+                KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
+                List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
+                attributes = SymbolTable[list_key];
+                Value_Type returned_Exp = handle_Expression(root.children[2]);//H
+                var set_val = new KeyValuePair<string, object>("Value", returned_Exp.value);
+                bool novalue = true;//H
+                for (int i = 0; i < attributes.Count; i++)//H
+                {
+                    if (attributes[i].Key == "Value")
+                    {
+                        attributes[i] = set_val;
+                        novalue = false;
+                    }
+                    if (attributes[i].Key == "Datatype")
+                    {
+                        if ((attributes[i].Value.ToString().ToLower()) != (returned_Exp.datatype.ToString().ToLower()))
+                        {
+                            Errors.Analyser_Error_List.Add("Datatype of assigned value and variable are different");
+                        }
+                    }
+                }
+                if (novalue)//H
+                {
+                    attributes.Add(set_val);
+                }
+                //attributes[0] = set_val;//H
+            }
         }
 
         //Assignment_op → :=  

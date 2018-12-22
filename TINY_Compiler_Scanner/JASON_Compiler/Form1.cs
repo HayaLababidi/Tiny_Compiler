@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.IO;
 namespace JASON_Compiler
 {
     public partial class Form1 : Form
@@ -103,6 +103,7 @@ namespace JASON_Compiler
         private void Form1_Load(object sender, EventArgs e)
         {
 
+            richTextBox1.Text = File.ReadAllText("code.txt").ToLower();
         }
         /*  void PrintLexemes()
 {
