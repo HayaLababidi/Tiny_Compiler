@@ -1265,7 +1265,7 @@ namespace JASON_Compiler
             string funName = root.children[1].token.lex;
             value.datatype = root.children[1].datatype;
 
-            if (root.children[3] != null)
+            if (root.children[3].children[0] != null)
             {
                 param = handle_parameters(root.children[3]);
                 value.parameters = param;
@@ -1314,50 +1314,57 @@ namespace JASON_Compiler
             List<Value_Type> dataTypeOFarguments = new List<Value_Type>();
             List<KeyValuePair<string, string>> dataTypeOFparams = new List<KeyValuePair<string,string>>();
             functionTableValue funTableValue = new functionTableValue();
-            dataTypeOFparams = funTableValue.parameters;
+            
             string funName = root.children[0].token.lex;
 
             //if1 the fun exist in function table
             if (FunctionTable.ContainsKey(funName))
             {
-                //if2 the function contains parameters
-                if ((root.children[2].token.lex != ")") && (dataTypeOFarguments.Count == 0))
-                {
-                    dataTypeOFarguments = handle_argument_list(root.children[2]);
+               funTableValue = FunctionTable[funName];
+               dataTypeOFparams = funTableValue.parameters;
 
-                    //if3 the num of arguments equal num of parameters
-                    if (dataTypeOFparams.Count == dataTypeOFarguments.Count)
-                    {
-                        for (int i = 0; i < dataTypeOFparams.Count; i++)
-                        {
-                            //if4 the data type of arguments equal data type of parameters
-                            if (dataTypeOFparams[i].Key.ToString() != dataTypeOFarguments[i].datatype.ToString())
-                            {
-                                matchparam.dataTypeOFArguments = false;
-                                break;
-                            }                          
-                        }
-                    }
-                    //else3 the num of arguments not equal num of parameters
-                    else
-                        matchparam.numOFArguments = false;
-                }
-                //else2 num of parameters is zero and  num of arguments not equal zero
-                else
-                    matchparam.numOFArguments = false;
+                //if2 the function contains arguments
+               if ((root.children[2] != null))
+               {
+                   dataTypeOFarguments = handle_argument_list(root.children[2]);
+
+                   //if3 the num of arguments equal num of parameters
+                   if (funTableValue.numOFparam == dataTypeOFarguments.Count)
+                   {
+                       for (int i = 0; i < funTableValue.numOFparam; i++)
+                       {
+                           //if4 the data type of arguments equal data type of parameters
+                           if (dataTypeOFparams[i].Value.ToString() != dataTypeOFarguments[i].datatype.ToString())
+                           {
+                               matchparam.dataTypeOFArguments = false;
+                               break;
+                           }
+                       }
+                   }
+                   //else3 the num of arguments not equal num of parameters
+                   else
+
+                       matchparam.numOFArguments = false;
+               }
+               //else2 num of arguments  is zero and check if num of parameters equal zero
+               else
+               {
+                   if (funTableValue.numOFparam != 0)
+                       matchparam.numOFArguments = false;
+               }
 
                 if (matchparam.numOFArguments != true)
                 {
-                    Errors.Analyser_Error_List.Add(" Number of arguments mismatch");
+                    Errors.Analyser_Error_List.Add("In Call Function (" + funName + ")" + " Number of arguments mismatch");
                 }
                 if (matchparam.dataTypeOFArguments != true)
                 {
-                    Errors.Analyser_Error_List.Add(" arguments datatype mismatch");
+                    Errors.Analyser_Error_List.Add("In Call Function (" + funName + ")" + " arguments datatype mismatch");
                 }
             }
             //else1 function name not exist in function table
             else
-                Errors.Analyser_Error_List.Add(root.children[0].token.lex + " Undeclared function");
+                Errors.Analyser_Error_List.Add(funName + " Is Undeclared function");
 
             return funTableValue.datatype;
         }

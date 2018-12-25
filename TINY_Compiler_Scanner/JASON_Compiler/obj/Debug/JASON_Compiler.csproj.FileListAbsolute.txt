@@ -143,3 +143,4 @@ D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TIN
 D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.SemanticAnalyserForm.resources
 D:\Redirected Profile\Desktop\fcis\kolya\year 4\git\New folder\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
 D:\CS\FCIS\Semester_7\Compilers Theory\Tiny Compiler\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csprojResolveAssemblyReference.cache
+E:\university\Fourth Year\Compiler\projects\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.SemanticAnalyserForm.resources
