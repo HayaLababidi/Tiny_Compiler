@@ -42,10 +42,13 @@ namespace JASON_Compiler
         //utitlity function 
         static void setscope(Node root) 
         {
-            for (int i = 0; i < root.children.Count; i++)
+            if (root != null)
             {
-                if (root.children[i] != null)
-                    root.children[i].scope = root.scope;
+                for (int i = 0; i < root.children.Count; i++)
+                {
+                    if (root.children[i] != null)
+                        root.children[i].scope = root.scope;
+                }
             }
         }
         static bool sameScope(string parentscope, string currentscope)
@@ -62,12 +65,16 @@ namespace JASON_Compiler
 
         public static void handle_Main_Function(Node root)
         {
+            root.scope = "main";
+            root.datatype = root.children[0].children[0].token.lex;
+            root.children[4].datatype = root.datatype;
+
             root.children[4].scope = "main";//function body
             handle_Function_body(root.children[4]);
 
             functionTableValue value = new functionTableValue();
             string funName = root.children[1].token.lex;
-            value.datatype = root.children[1].datatype;
+            value.datatype = root.datatype;
             value.numOFparam = 0;
             if (!FunctionTable.ContainsKey(funName))
                 FunctionTable.Add(funName, value);
@@ -164,6 +171,7 @@ namespace JASON_Compiler
             root.children[0].datatype = root.children[0].children[0].token.lex;//Datatype
             root.children[1].datatype = root.children[0].children[0].token.lex;//Declared_Var_list
             root.children[1].scope = root.scope;
+            setscope(root);
             handle_Declared_Var_list(root.children[1]);
         }
 
@@ -172,6 +180,7 @@ namespace JASON_Compiler
 
             root.children[0].datatype = root.datatype;//Declared_Var
             root.children[0].scope = root.scope;//Declared_Var
+            setscope(root);
             handle_Declared_Var(root.children[0]);
             if (root.children[1] != null)
             {
@@ -184,6 +193,7 @@ namespace JASON_Compiler
         {
             root.children[1].datatype = root.datatype;//Declared_Var
             root.children[1].scope = root.scope;//Declared_Var
+            setscope(root);
             handle_Declared_Var(root.children[1]);
             if (root.children[2]!=null)
             {
@@ -198,14 +208,23 @@ namespace JASON_Compiler
 
             root.children[0].datatype = root.datatype;//identifier
             root.children[0].scope = root.scope;
+            setscope(root);
             KeyValuePair<string, string> var = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
             List<KeyValuePair<string, object>> prop=new List<KeyValuePair<string,object>>();
             prop.Add(new KeyValuePair<string,object>("Datatype",root.datatype));
-            if (SymbolTable.ContainsKey(var))
+            bool check=false;
+            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
             {
-                Errors.Analyser_Error_List.Add("A local variable named " + var.Key + " is already defined in this scope");
+                if (variable.Key == var.Key)//same variable check scope
+                {
+                    if (sameScope(variable.Value, var.Value))
+                    {
+                        Errors.Analyser_Error_List.Add("A local variable named " + var.Key + " is already defined in this scope");
+                        check=true;
+                    }
+                }
             }
-            else
+            if(!check)
             {
                 SymbolTable.Add(var,prop);
             }
@@ -223,8 +242,21 @@ namespace JASON_Compiler
 
         public static object handle_Declared_Var_Dash(Node root) 
         {
-            Value_Type returned_Exp = handle_Expression(root.children[1]);
-
+            Value_Type returned_Exp;
+            setscope(root);
+            if (root.children[1].token.lex == "Expression")
+            {
+                returned_Exp = handle_Expression(root.children[1]);
+            }
+            else if (root.children[1].children[1].token.lex == "Expression")
+            {
+                returned_Exp = handle_Expression(root.children[1].children[1]);
+            }
+            else
+            {
+                Errors.Analyser_Error_List.Add("unhandeled exception can't find Expression");
+                return null;
+            }
             if (returned_Exp.datatype.ToString().ToLower() == root.datatype.ToString().ToLower())
             {
                 if (returned_Exp.value != null)
@@ -268,27 +300,33 @@ namespace JASON_Compiler
             //KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
             KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.token.lex, root.scope);//H
             List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-            if (SymbolTable.ContainsKey(list_key))//H //make sure key exist
+
+            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
             {
-                attributes = SymbolTable[list_key];
-                foreach (KeyValuePair<string, object> element in attributes)
+                if (variable.Key == list_key.Key)//same variable check scope
                 {
-                    if (element.Key == "Value")
-                        val.value = element.Value;
-                    if (element.Key == "Datatype")
-                        val.datatype = element.Value;
+                    if (sameScope(variable.Value, list_key.Value))
+                    {
+                        attributes = SymbolTable[variable];
+                        foreach (KeyValuePair<string, object> element in attributes)
+                        {
+                            if (element.Key == "Value")
+                                val.value = element.Value;
+                            if (element.Key == "Datatype")
+                                val.datatype = element.Value;
+                        }
+                        root.value = val.value;
+                        root.datatype = val.datatype.ToString();
+                        //root.children[0].value=val.value;
+                        //val.datatype = "identifier";
+                        return val;
+                    }
                 }
-                root.value = val.value;
-                root.datatype = val.datatype.ToString();
-                //root.children[0].value=val.value;
-                //val.datatype = "identifier";
-                return val;
             }
-            else//H
-            {
-                Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
-                return null;
-            }
+            //H
+            Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
+            return null;
+            
             
         }
 
@@ -325,17 +363,24 @@ namespace JASON_Compiler
             setscope(root);
             if (root.children[0].token.lex == "Function_Call")
             {
-                //val = handle_Function_Call(root.children[0]);
+                val.datatype = handle_function_call(root.children[0]);
             }
 
             else if (root.children[0].token.token_type == Token_Class.Identifier)
             {
-                if (SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
+                bool check=false;
+                foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
                 {
-                    //val = handle_Identifier(root);   
-                    val = handle_Identifier(root.children[0]);//H   
+                    if (variable.Key == root.children[0].token.lex)//same variable check scope
+                    {
+                        if (sameScope(variable.Value, root.children[0].scope))
+                        {
+                            val = handle_Identifier(root.children[0]);
+                            check=true;
+                        }
+                    }
                 }
-                else
+                if (!check)
                     Errors.Analyser_Error_List.Add("Variable " + root.children[0].token.lex + " not found");
             }
 
@@ -880,7 +925,20 @@ namespace JASON_Compiler
         public static void handle_Assignment_statement(Node root)
         {
             setscope(root);
-            if (!SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
+            bool variable_Found=false;
+            List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
+            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
+            {
+                if (variable.Key == root.children[0].token.lex)//same variable check scope
+                {
+                    if (sameScope(variable.Value, root.children[0].scope))
+                    {
+                        variable_Found=true;
+                        attributes = SymbolTable[variable];
+                    }
+                }
+            }
+            if (!variable_Found)
             {
                 //Errors.Analyser_Error_List.Add("Variable not found");
                 Errors.Analyser_Error_List.Add(root.children[0].token.lex + " Variable not found (undeclared)");//H
@@ -888,8 +946,6 @@ namespace JASON_Compiler
             else//H
             {
                 KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
-                List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-                attributes = SymbolTable[list_key];
                 Value_Type returned_Exp = handle_Expression(root.children[2]);//H
                 var set_val = new KeyValuePair<string, object>("Value", returned_Exp.value);
                 bool novalue = true;//H
@@ -908,7 +964,7 @@ namespace JASON_Compiler
                         }
                     }
                 }
-                if (novalue)//H
+                if (novalue && set_val.Value!=null)//H
                 {
                     attributes.Add(set_val);
                 }
@@ -943,7 +999,11 @@ namespace JASON_Compiler
             Node identifier = root.children[0];
             Node rightHS = root.children[2];
             handle_Identifier(identifier);//neglecting the return since it fills itin root //Value_Type id = handle_Identifier(identifier);
-            rightHS.value = handleTerm(rightHS);
+
+            //rightHS.value = handleTerm(rightHS);//the returned value is a struct not the actual value
+            Value_Type temp = handle_Expression(rightHS);//H
+            rightHS.value = temp.value;//H
+            rightHS.datatype = (string)temp.datatype;//H
             if (rightHS.datatype == identifier.datatype)
             {
                 root.datatype = identifier.datatype;
@@ -953,7 +1013,8 @@ namespace JASON_Compiler
             else
             {
                 string error = @"wrong data type:can't compare {0} {1} (left hand side) to {2} right hand side ";
-                Errors.Analyser_Error_List.Add(string.Format(error, identifier.datatype ,identifier.token.lex,root , rightHS.datatype));
+                //Errors.Analyser_Error_List.Add(string.Format(error, identifier.datatype ,identifier.token.lex,root , rightHS.datatype));
+                Errors.Analyser_Error_List.Add(string.Format(error, identifier.datatype, identifier.token.lex, rightHS.datatype));//H
             }
         }
         public static void evaluateCondition(Node condition)
@@ -985,7 +1046,8 @@ namespace JASON_Compiler
             }
             else//real / string 
             {
-                switch (Cond_op.token.lex)
+                //switch (Cond_op.token.lex)
+                switch (Cond_op.children[0].token.lex)//H
                 {
                     case "<>":
                         condition.value = (bool)(LHS.value != RHS.value);
@@ -1115,6 +1177,12 @@ namespace JASON_Compiler
         public static void handleIf(Node root)
         {//If_Statement → if Condition_Statement then Statements Else_part
             root.scope = root.scope + "_If";//H
+            if (!scopeCount.ContainsKey(root.scope))
+            {
+                scopeCount[root.scope] = 0;
+            }
+            scopeCount[root.scope]++;
+            root.scope += scopeCount[root.scope];
             setscope(root);//H
             handleCondition_Statement(root.children[1]);
             handle_Statements(root.children[3]);//H
@@ -1124,23 +1192,31 @@ namespace JASON_Compiler
         public static void handleElse_Part(Node else_part)
         {// Else_part → Else_If_Statment | Else_Statment | end
             setscope(else_part);//H
-            if (else_part.children[0].children[0].token.lex=="elseif")
+            //if (else_part.children[0].children[0].token.lex=="elseif")
+            if (else_part.children[0].token.lex == "elseif")//H
             {
                 else_part.scope = else_part.scope + "_ElseIF";//H
                 handleElse_if_statment(else_part.children[0]);
             }
-            else if (else_part.children[0].children[0].token.lex == "else")//H
+            else if (else_part.children[0].token.lex == "else")//H
             {
                 else_part.scope = else_part.scope + "_Else";//H
                 handleElse_statment(else_part.children[0]);
             }
-            else if (else_part.children[0].children[0].token.lex == "end")//H
+            else if (else_part.children[0].token.lex == "end")//H
             {
                 handleEnd_Part(else_part.children[0]);
             }
         }
         public static void handleElse_statment(Node elsestatment)//H
         {// Else_Statment → else Statements end
+            elsestatment.scope = elsestatment.scope + "_els";//H
+            if (!scopeCount.ContainsKey(elsestatment.scope))
+            {
+                scopeCount[elsestatment.scope] = 0;
+            }
+            scopeCount[elsestatment.scope]++;
+            elsestatment.scope += scopeCount[elsestatment.scope];
             setscope(elsestatment);//H
             handle_Statements(elsestatment.children[1]);
             handleEnd_Part(elsestatment.children[2]);
@@ -1151,12 +1227,26 @@ namespace JASON_Compiler
         }
         public static void handleElse_if_statment(Node elseifstatment)
         {// Else_If_Statement → elseif Condition_Statement then Statements Else_part
+            elseifstatment.scope = elseifstatment.scope + "_elif";//H
+            if (!scopeCount.ContainsKey(elseifstatment.scope))
+            {
+                scopeCount[elseifstatment.scope] = 0;
+            }
+            scopeCount[elseifstatment.scope]++;
+            elseifstatment.scope += scopeCount[elseifstatment.scope];
+            setscope(elseifstatment);
             handleCondition_Statement(elseifstatment.children[1]);
             handleElse_Part(elseifstatment.children[4]);
         }
         public static void handleRepeat_Statement(Node root)
         {//Repeat_Statement→ repeat Statements until Condition_Statement
-            root.scope += "R";//H
+            root.scope += "_R";//H
+            if (!scopeCount.ContainsKey(root.scope))
+            {
+                scopeCount[root.scope] = 0;
+            }
+            scopeCount[root.scope]++;
+            root.scope += scopeCount[root.scope];
             setscope(root);//H
             handle_Statements(root.children[1]);//H
             handleCondition_Statement(root.children[3]);

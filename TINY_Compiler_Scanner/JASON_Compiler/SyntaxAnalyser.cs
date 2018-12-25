@@ -272,7 +272,7 @@ namespace JASON_Compiler
 
             returned_node.children.Add(Match(Token_Class.Identifier, Tokens));
             returned_node.children.Add(Condition_Operator(Tokens));
-            returned_node.children.Add(Term(Tokens));
+            returned_node.children.Add(Expression(Tokens));
 
             return returned_node;
         }
