@@ -1044,7 +1044,33 @@ namespace JASON_Compiler
                  
                 
             }
-            else//real / string 
+            else if (condition.datatype == "int")//real / string 
+            {
+                //switch (Cond_op.token.lex)
+                switch (Cond_op.children[0].token.lex)//H
+                {
+                    case "<>":
+                        condition.value = (bool)(LHS.value != RHS.value);
+                        break;
+
+                    case "=":
+                        condition.value = (bool)(LHS.value == RHS.value);
+                        break;
+
+                    case ">":
+                        condition.value = (bool)((int)LHS.value > (int)RHS.value);
+                        break;
+                    case "<":
+                        condition.value = (bool)((int)LHS.value < (int)RHS.value);
+                        break;
+                    default:
+                        string error = "wrong operator";
+                        Errors.Analyser_Error_List.Add(error);
+                        break;
+                }
+                
+            }
+            else if (condition.datatype == "float")//real / string 
             {
                 //switch (Cond_op.token.lex)
                 switch (Cond_op.children[0].token.lex)//H
@@ -1068,7 +1094,7 @@ namespace JASON_Compiler
                         Errors.Analyser_Error_List.Add(error);
                         break;
                 }
-                
+
             }
         }
         public static void handleCondition_Statement(Node condition_statment)
@@ -1263,6 +1289,8 @@ namespace JASON_Compiler
             functionTableValue value = new functionTableValue();
             List<KeyValuePair<string, string>> param = new List<KeyValuePair<string, string>>();
             string funName = root.children[1].token.lex;
+            root.scope = funName;
+            setscope(root);
             value.datatype = root.children[1].datatype;
 
             if (root.children[3].children[0] != null)
@@ -1270,6 +1298,12 @@ namespace JASON_Compiler
                 param = handle_parameters(root.children[3]);
                 value.parameters = param;
                 value.numOFparam = param.Count();
+                foreach (KeyValuePair<string,string> p in value.parameters)//H
+                {   
+                    List<KeyValuePair<string,object>> temp = new List<KeyValuePair<string,object>>();
+                    temp.Add(new KeyValuePair<string, object>("Datatype", p.Value));
+                    SymbolTable.Add(new KeyValuePair<string,string>(p.Key,funName),temp);
+                }
             }
             else
             {
@@ -1334,10 +1368,17 @@ namespace JASON_Compiler
                        for (int i = 0; i < funTableValue.numOFparam; i++)
                        {
                            //if4 the data type of arguments equal data type of parameters
-                           if (dataTypeOFparams[i].Value.ToString() != dataTypeOFarguments[i].datatype.ToString())
+                           if (dataTypeOFarguments[i].datatype != null)//H
                            {
-                               matchparam.dataTypeOFArguments = false;
-                               break;
+                               if (dataTypeOFparams[i].Value.ToString() != dataTypeOFarguments[i].datatype.ToString())
+                               {
+                                   matchparam.dataTypeOFArguments = false;
+                                   break;
+                               }
+                           }
+                           else//H 
+                           {
+                               Errors.Analyser_Error_List.Add("use of undeclared variable as function argument when calling (" + funName + ")");
                            }
                        }
                    }
@@ -1399,13 +1440,11 @@ namespace JASON_Compiler
         {
             if (root.token.lex.ToLower() == "function_list")
             {
-                foreach (Node child in root.children)
+                if (root.children[0] != null)
                 {
-                    if (child != null)
-                    {
-                        handle_Function_Statement(child);
-                    }
+                    handle_Function_Statement(root.children[0]);
                 }
+                
             }
             else if (root.token.lex.ToLower() == "main_function")
             {
