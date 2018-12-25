@@ -1023,95 +1023,101 @@ namespace JASON_Compiler
             Node Cond_op = condition.children[1];
             Node RHS = condition.children[0];
             Node LHS = condition.children[2];
-            if (condition.datatype == "string")
-            {
-                switch (Cond_op.token.lex)
+            if (LHS.value != null && RHS.value != null)
+            {//if none of the variables is runtime dependant
+                if (condition.datatype == "string")
                 {
-                    case "<>":
-                        condition.value = (bool)(LHS.token.lex != RHS.token.lex);
-                        //if boolvalue=true condition.value=1 else 0 
-                        break;
+                    switch (Cond_op.token.lex)
+                    {
+                        case "<>":
+                            condition.value = (bool)(LHS.token.lex != RHS.token.lex);
+                            //if boolvalue=true condition.value=1 else 0 
+                            break;
 
-                    case "=":
-                        condition.value = (bool)(LHS.token.lex == RHS.token.lex);
-                        break;
+                        case "=":
+                            condition.value = (bool)(LHS.token.lex == RHS.token.lex);
+                            break;
 
-                    default:
-                        string error = "operator {0} can't be used with string condtion";
-                        Errors.Analyser_Error_List.Add(string.Format(error, Cond_op.token.lex));
-                        break;
+                        default:
+                            string error = "operator {0} can't be used with string condtion";
+                            Errors.Analyser_Error_List.Add(string.Format(error, Cond_op.token.lex));
+                            break;
+                    }
+
+
                 }
-                 
-                
-            }
-            else if (condition.datatype == "int")//real / string 
-            {
-                //switch (Cond_op.token.lex)
-                switch (Cond_op.children[0].token.lex)//H
+                else if (condition.datatype == "int")//real / string 
                 {
-                    case "<>":
-                        condition.value = (bool)(LHS.value != RHS.value);
-                        break;
+                    //switch (Cond_op.token.lex)
 
-                    case "=":
-                        condition.value = (bool)(LHS.value == RHS.value);
-                        break;
+                    switch (Cond_op.children[0].token.lex)//H
+                    {
+                        case "<>":
+                            condition.value = (bool)(LHS.value != RHS.value);
+                            break;
 
-                    case ">":
-                        condition.value = (bool)((int)LHS.value > (int)RHS.value);
-                        break;
-                    case "<":
-                        condition.value = (bool)((int)LHS.value < (int)RHS.value);
-                        break;
-                    default:
-                        string error = "wrong operator";
-                        Errors.Analyser_Error_List.Add(error);
-                        break;
+                        case "=":
+                            condition.value = (bool)(LHS.value == RHS.value);
+                            break;
+
+                        case ">":
+                            condition.value = (bool)((int)LHS.value > (int)RHS.value);
+                            break;
+                        case "<":
+                            condition.value = (bool)((int)LHS.value < (int)RHS.value);
+                            break;
+                        default:
+                            string error = "wrong operator";
+                            Errors.Analyser_Error_List.Add(error);
+                            break;
+                    }
+
                 }
-                
-            }
-            else if (condition.datatype == "float")//real / string 
-            {
-                //switch (Cond_op.token.lex)
-                switch (Cond_op.children[0].token.lex)//H
+                else if (condition.datatype == "float")//real / string 
                 {
-                    case "<>":
-                        condition.value = (bool)(LHS.value != RHS.value);
-                        break;
+                    //switch (Cond_op.token.lex)
+                    switch (Cond_op.children[0].token.lex)//H
+                    {
+                        case "<>":
+                            condition.value = (bool)(LHS.value != RHS.value);
+                            break;
 
-                    case "=":
-                        condition.value = (bool)(LHS.value == RHS.value);
-                        break;
+                        case "=":
+                            condition.value = (bool)(LHS.value == RHS.value);
+                            break;
 
-                    case ">":
-                        condition.value = (bool)((float)LHS.value > (float)RHS.value);
-                        break;
-                    case "<":
-                        condition.value = (bool)((float)LHS.value < (float)RHS.value);
-                        break;
-                    default:
-                        string error = "wrong operator";
-                        Errors.Analyser_Error_List.Add(error);
-                        break;
+                        case ">":
+                            condition.value = (bool)((float)LHS.value > (float)RHS.value);
+                            break;
+                        case "<":
+                            condition.value = (bool)((float)LHS.value < (float)RHS.value);
+                            break;
+                        default:
+                            string error = "wrong operator";
+                            Errors.Analyser_Error_List.Add(error);
+                            break;
+                    }
+
                 }
-
             }
+            else condition.value = null;
+            //if one of the variables is a runtime input
         }
         public static void handleCondition_Statement(Node condition_statment)
         {//Condition_Statement → Condition Boolean_Exp
          // x==5    (|| y==7 && z>5)
             setscope(condition_statment);
-            Node condition = condition_statment.children[0];
+            //Node condition = condition_statment.children[0];
             Node boolean_exp = condition_statment.children[1];
-            handleCondition(condition);
+            handleCondition(condition_statment.children[0]);
             if (boolean_exp != null)
-            {
-                handleBool_Exp(boolean_exp);
+            {// handleBool_Exp(boolean_exp);
+                handleBool_Exp(condition_statment.children[1]);
                 evaluateCondition_Statement(condition_statment);
             }
             else
-            {
-                condition_statment.value = condition.value;
+            {// condition_statment.value = condition.value;
+                condition_statment.value = condition_statment.children[0].value;
             }
             //check if it actually works 
         }
@@ -1132,7 +1138,7 @@ namespace JASON_Compiler
                     {
                         handleBool_Exp(boolean_exp.children[2]);
                         setscope(boolean_exp.children[2]);
-                        string child_boolean_operator = boolean_exp.children[2].children[0].token.lex;
+                        string child_boolean_operator = boolean_exp.children[2].children[0].children[0].token.lex;
                         bool child_condition = (bool)boolean_exp.children[2].children[1].value;
                         switch (child_boolean_operator)
                         {
@@ -1166,14 +1172,15 @@ namespace JASON_Compiler
 
         }
         public static void evaluateCondition_Statement(Node condition_statment)
-        {
-            setscope(condition_statment);
-            // x==5    (|| y==7 && z>5)
+        {   // x==5    (|| y==7 && z>5)
             //Boolean_Exp → Boolean_Operator Condition Boolean_Exp | ε
             //boolean_opertor || condition y==7 boolean expression &&z>5
+            setscope(condition_statment);
             Node boolean_exp = condition_statment.children[1];
-            string boolean_operator = boolean_exp.children[0].token.lex;
-            if (boolean_exp.value != null && condition_statment.children[0].value != null)//H //can be null so the the condition_statment value is null
+            string boolean_operator = boolean_exp.children[0].children[0].token.lex;
+
+            //H //can be null so the condition_statment value is null
+            if (boolean_exp.value != null && condition_statment.children[0].value != null)
             {
                 bool bool_expval = (bool)boolean_exp.value;
                 bool conditionval = (bool)condition_statment.children[0].value;
