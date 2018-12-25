@@ -32,6 +32,9 @@ namespace JASON_Compiler
         //            Dictionary<funName,List<parameters<name, datatype>>> (num of parameters is the length of the list)
         public static Dictionary<string, functionTableValue> FunctionTable = new Dictionary<string, functionTableValue>();
 
+        //to maintain the sequance number of each subscope 
+        public static Dictionary<String, int> scopeCount = new Dictionary<string, int>();
+
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////SEMANTIC CODE HERE///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,6 +263,7 @@ namespace JASON_Compiler
         # region p2_____________
         public static Value_Type handle_Identifier(Node root)
         {
+            setscope(root);
             Value_Type val = new Value_Type();
             //KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
             KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.token.lex, root.scope);//H
@@ -358,6 +362,7 @@ namespace JASON_Compiler
         //Equation → MathTerm Equation’ 
         public static Value_Type handle_Equation(Node root)
         {
+            setscope(root);
             List<Value_Type> val = new List<Value_Type>();
             List<Value_Type> val_sorted = new List<Value_Type>();
             Value_Type result = new Value_Type();
@@ -698,6 +703,7 @@ namespace JASON_Compiler
         //Equation ‘→ Add_op MathTerm Equation ‘| ε  
         public static List<Value_Type> handle_Equationdash(Node root)
         {
+            setscope(root);
             List<Value_Type> val = new List<Value_Type>();
 
             if (root.children[0].token.lex == "Addop")
@@ -731,6 +737,7 @@ namespace JASON_Compiler
         //Add_op → +|- 
         public static Value_Type handle_AddOp(Node root)
         {
+            setscope(root);
             Value_Type val = new Value_Type();
 
             if (root.children[0].token.token_type == Token_Class.PlusOp)
@@ -752,7 +759,7 @@ namespace JASON_Compiler
         public static Value_Type handle_MulOp(Node root)
         {
             Value_Type val = new Value_Type();
-
+            setscope(root);
             if (root.children[0].token.token_type == Token_Class.MultiplyOp)
             {
                 val.value = '*';
@@ -770,19 +777,22 @@ namespace JASON_Compiler
         //MathTerm → Factor MathTerm’  
         public static List<Value_Type> handle_MathTerm(Node root)
         {
+            setscope(root);
             List<Value_Type> val = new List<Value_Type>();
 
             if (root.children[0].token.lex == "Factor")
             {
                 List<Value_Type> factor_list = new List<Value_Type>();
-                factor_list = handle_Factor(root.children[2]);
+                //factor_list = handle_Factor(root.children[2]);
+                factor_list = handle_Factor(root.children[0]);//H
                 for (int i = 0; i < factor_list.Count; i++)
                 {
                     val.Add(factor_list[i]);
                 }
             }
 
-            if (root.children[1].token.lex == "MathTerm'")
+            //if (root.children[1].token.lex == "MathTerm'")
+            if (root.children[1] != null && root.children[1].token.lex == "MathTerm'")//H
             {
                 List<Value_Type> mathterm_list = new List<Value_Type>();
                 mathterm_list = handle_MathTermdash(root.children[1]);
@@ -799,6 +809,7 @@ namespace JASON_Compiler
         //MathTerm ‘→ Mul-op Factor MathTerm ‘| ε  
         public static List<Value_Type> handle_MathTermdash(Node root)
         {
+            setscope(root);
             List<Value_Type> val = new List<Value_Type>();
 
             if (root.children[0].token.lex == "Mulop")
@@ -834,6 +845,7 @@ namespace JASON_Compiler
         //Factor → (Equation) | number  
         public static List<Value_Type> handle_Factor(Node root)
         {
+            setscope(root);
             List<Value_Type> val = new List<Value_Type>();
 
             if (root.children[0].token.token_type == Token_Class.LParanthesis)
@@ -855,7 +867,8 @@ namespace JASON_Compiler
                 }
             }
 
-            else if (root.children[0].token.token_type == Token_Class.Number || root.children[0].token.token_type == Token_Class.FloatNumber || root.children[0].token.token_type == Token_Class.Identifier)
+            //else if (root.children[0].token.token_type == Token_Class.Number || root.children[0].token.token_type == Token_Class.FloatNumber || root.children[0].token.token_type == Token_Class.Identifier)
+            else if (root.children[0].token.lex == "Term")//H
             {
                 val.Add(handleTerm(root.children[0]));
             }
@@ -866,6 +879,7 @@ namespace JASON_Compiler
         //Assignment_statement → identifier Assignment_operator Expression
         public static void handle_Assignment_statement(Node root)
         {
+            setscope(root);
             if (!SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
             {
                 //Errors.Analyser_Error_List.Add("Variable not found");
@@ -907,6 +921,7 @@ namespace JASON_Compiler
         //Assignment_op → :=  
         public static Value_Type handle_AssOp(Node root)
         {
+            setscope(root);
             Value_Type val = new Value_Type();
 
             if(root.children[0].token.token_type == Token_Class.AssignmentOp)
@@ -914,15 +929,6 @@ namespace JASON_Compiler
 
             return val;
         }
-
-        
-        //variables of type object can accept values of any data type (the value)
-        //string is must be the datatype 
-        //if the value can't be computed return null (for example expression=var and var does not have a value)
-        public static KeyValuePair<string, object> EvaluateExpression/*get value*/(Node root)//must evaluate the value of the expression and its datatype
-        { return new KeyValuePair<string, object>(); }
-
-        //public static void getValue(Node root) { }//dont handle strings ;int /real only 
 
         //endP2
         #endregion
@@ -952,6 +958,7 @@ namespace JASON_Compiler
         }
         public static void evaluateCondition(Node condition)
         {//true/false
+            setscope(condition);
             Node Cond_op = condition.children[1];
             Node RHS = condition.children[0];
             Node LHS = condition.children[2];
@@ -1021,7 +1028,9 @@ namespace JASON_Compiler
             //check if it actually works 
         }
         public static void handleBool_Exp(Node boolean_exp)
-        {   // x==5       ||        y==7      &&    z>5
+        {
+            setscope(boolean_exp);
+            // x==5       ||        y==7      &&    z>5
             // condition  0operator 1condition  2.0oprator 2.1condition  ε
             //boolean_opertor || condition y==7 boolean expression &&z>5
             if (boolean_exp.children[0] != null)
@@ -1034,6 +1043,7 @@ namespace JASON_Compiler
                     if (boolean_exp.children[2] != null)//H
                     {
                         handleBool_Exp(boolean_exp.children[2]);
+                        setscope(boolean_exp.children[2]);
                         string child_boolean_operator = boolean_exp.children[2].children[0].token.lex;
                         bool child_condition = (bool)boolean_exp.children[2].children[1].value;
                         switch (child_boolean_operator)
@@ -1069,6 +1079,7 @@ namespace JASON_Compiler
         }
         public static void evaluateCondition_Statement(Node condition_statment)
         {
+            setscope(condition_statment);
             // x==5    (|| y==7 && z>5)
             //Boolean_Exp → Boolean_Operator Condition Boolean_Exp | ε
             //boolean_opertor || condition y==7 boolean expression &&z>5
@@ -1145,6 +1156,9 @@ namespace JASON_Compiler
         }
         public static void handleRepeat_Statement(Node root)
         {//Repeat_Statement→ repeat Statements until Condition_Statement
+            root.scope += "R";//H
+            setscope(root);//H
+            handle_Statements(root.children[1]);//H
             handleCondition_Statement(root.children[3]);
         }
 
