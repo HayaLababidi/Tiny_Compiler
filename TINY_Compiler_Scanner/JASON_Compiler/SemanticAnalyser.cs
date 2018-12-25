@@ -1021,8 +1021,8 @@ namespace JASON_Compiler
         {//true/false
             setscope(condition);
             Node Cond_op = condition.children[1];
-            Node RHS = condition.children[0];
-            Node LHS = condition.children[2];
+            Node RHS = condition.children[2];
+            Node LHS = condition.children[0];
             if (LHS.value != null && RHS.value != null)
             {//if none of the variables is runtime dependant
                 if (condition.datatype == "string")
@@ -1223,7 +1223,7 @@ namespace JASON_Compiler
 
             foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
             {
-                if (sameScope(variable.Value, root.scope))
+                if (variable.Value== root.scope)
                 {
                     local_Vars_to_remove.Add(variable);
                 }
@@ -1265,7 +1265,7 @@ namespace JASON_Compiler
 
             foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
             {
-                if (sameScope(variable.Value, elsestatment.scope))
+                if (variable.Value==elsestatment.scope)
                 {
                     local_Vars_to_remove.Add(variable);
                 }
@@ -1292,7 +1292,7 @@ namespace JASON_Compiler
 
             foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
             {
-                if (sameScope(variable.Value, elseifstatment.scope))
+                if (variable.Value== elseifstatment.scope)
                 {
                     local_Vars_to_remove.Add(variable);
                 }
@@ -1314,6 +1314,20 @@ namespace JASON_Compiler
             root.scope += scopeCount[root.scope];
             setscope(root);//H
             handle_Statements(root.children[1]);//H
+            List<KeyValuePair<string, string>> local_Vars_to_remove = new List<KeyValuePair<string, string>>();
+
+            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
+            {
+                if (variable.Value == root.scope)
+                {
+                    local_Vars_to_remove.Add(variable);
+                }
+            }
+            foreach (KeyValuePair<string, string> variable in local_Vars_to_remove)//H
+            {
+                SymbolTable.Remove(variable);
+            }
+
             handleCondition_Statement(root.children[3]);
         }
 
