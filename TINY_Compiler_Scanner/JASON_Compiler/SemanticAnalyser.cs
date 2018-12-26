@@ -116,8 +116,10 @@ namespace JASON_Compiler
         {
             setscope(root);
             setscope(root.children[1]);
-            Value_Type ret = handle_Expression(root.children[1]);
-            if (ret != null)
+            Value_Type ret;
+            try
+            {
+                ret = handle_Expression(root.children[1]);if (ret != null)
             {
                 root.children[1].value = ret.value;
             }
@@ -125,6 +127,12 @@ namespace JASON_Compiler
             {
                 Errors.Analyser_Error_List.Add(root.children[1].datatype + " return datatype incompatible" + (string)ret.datatype);
             }
+            }
+            catch
+            {
+                ret=null;
+            }
+            
         }
         public static void handle_Statements(Node root)
         {
@@ -255,9 +263,15 @@ namespace JASON_Compiler
             else
             {
                 Errors.Analyser_Error_List.Add("unhandeled exception can't find Expression");
-                return null;
+
+                if (root.datatype == "int")
+                    return 0;
+                else if (root.datatype == "float")
+                    return 0.0;
+                else
+                    return " ";
             }
-            if (returned_Exp.datatype.ToString().ToLower() == root.datatype.ToString().ToLower())
+            if (returned_Exp.datatype!=null&&(returned_Exp.datatype.ToString().ToLower() == root.datatype.ToString().ToLower()))
             {
                 if (returned_Exp.value != null)
                 {
@@ -268,7 +282,12 @@ namespace JASON_Compiler
             {
                 Errors.Analyser_Error_List.Add("Data type of Expression is not the same as Declared Variable dataType");
             }
-            return null;
+            if (root.datatype == "int")
+                return 0;
+            else if (root.datatype == "float")
+                return 0.0;
+            else
+                return " ";
         }
         public static void handle_Write(Node root)
         {
@@ -295,12 +314,14 @@ namespace JASON_Compiler
             Value_Type val = new Value_Type();
             KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[1].token.lex, root.children[1].scope);//H
             List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
+            bool check = false;
             foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
             {
                 if (variable.Key == list_key.Key)//same variable check scope
                 {
                     if (sameScope(variable.Value, list_key.Value))
                     {
+                        check = true;
                         attributes = SymbolTable[variable];
                         foreach (KeyValuePair<string, object> element in attributes)
                         {
@@ -339,7 +360,8 @@ namespace JASON_Compiler
                 }
             }
             //H
-            Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
+            if(!check)
+                Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
 
         }
         //endP1
@@ -1316,14 +1338,18 @@ namespace JASON_Compiler
             {
                 SymbolTable.Remove(variable);
             }
-            handleElse_Part(root.children[4]);
+            if(root.children[4] !=null)
+                handleElse_Part(root.children[4]);
                 //else part
         }
         public static void handleElse_Part(Node else_part)
         {// Else_part → Else_If_Statment | Else_Statment | end
             setscope(else_part);//H
             //if (else_part.children[0].children[0].token.lex=="elseif")
-            if (else_part.children[0].children[0].token.lex == "elseif")//H
+            if (else_part.children[0].token.lex=="end")
+            {
+                }
+            else if (else_part.children[0].children[0].token.lex == "elseif")//H
             {
                 //else_part.scope = else_part.scope.Substring(0,else_part.scope.Length-3) + "_ElseIF";//H
                 handleElse_if_statment(else_part.children[0]);
@@ -1543,13 +1569,21 @@ namespace JASON_Compiler
             //else1 function name not exist in function table
             else
                 Errors.Analyser_Error_List.Add(funName + " Is Undeclared function");
+
             object temp;
-            if (funTableValue.datatype.ToString() == "int")
-                temp=0;
-            else if (funTableValue.datatype.ToString() == "float")
-                temp=0.0;
-            else
-                temp=" ";
+            try
+            {
+                if (funTableValue.datatype.ToString() == "int")
+                    temp = 0;
+                else if (funTableValue.datatype.ToString() == "float")
+                    temp = 0.0;
+                else
+                    temp = " ";
+            }
+            catch
+            {
+                temp = " ";
+            }
            
             Value_Type v= new Value_Type();
             v.datatype = funTableValue.datatype;
@@ -1560,26 +1594,26 @@ namespace JASON_Compiler
         {
             setscope(root);
             List<Value_Type> dataTypeParams = new List<Value_Type>();
-            List<Value_Type> paramType = new List<Value_Type>();
-            paramType.Add( handle_Expression(root.children[0]));
-            dataTypeParams.Concat(paramType);
+            Value_Type paramType = new Value_Type();
+            paramType = handle_Expression(root.children[0]);
+            dataTypeParams.Add(paramType);
             if (root.children[1] != null)
             {
                 paramType = handle_arguments(root.children[1]);
-                dataTypeParams.Concat(paramType);
+                dataTypeParams.Add(paramType);
             }
 
             return dataTypeParams;
         }
-        public static List<Value_Type> handle_arguments(Node root)
+        public static Value_Type handle_arguments(Node root)
         {
             setscope(root);
-            List<Value_Type> paramType = new List<Value_Type>();
             if (root.children[2] != null)
             {
-                paramType = handle_arguments(root.children[2]);
+                handle_arguments(root.children[2]);
             }
-            paramType.Add(handle_Expression(root.children[1]));
+            Value_Type paramType = new Value_Type();
+            paramType = handle_Expression(root.children[1]);
             return paramType;
         }
         # endregion
