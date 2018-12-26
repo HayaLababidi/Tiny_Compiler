@@ -300,42 +300,38 @@ namespace JASON_Compiler
             //KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
             KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.token.lex, root.scope);//H
             List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-
-            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
+            if (SymbolTable.ContainsKey(list_key))//H //make sure key exist
             {
-                if (variable.Key == list_key.Key)//same variable check scope
+                attributes = SymbolTable[list_key];
+                foreach (KeyValuePair<string, object> element in attributes)
                 {
-                    if (sameScope(variable.Value, list_key.Value))
-                    {
-                        attributes = SymbolTable[variable];
-                        foreach (KeyValuePair<string, object> element in attributes)
-                        {
-                            if (element.Key == "Value")
-                                val.value = element.Value;
-                            if (element.Key == "Datatype")
-                                val.datatype = element.Value;
-                        }
-                        root.value = val.value;
-                        root.datatype = val.datatype.ToString();
-                        //root.children[0].value=val.value;
-                        //val.datatype = "identifier";
-                        return val;
-                    }
+                    if (element.Key == "Value")
+                        val.value = element.Value;
+                    if (element.Key == "Datatype")
+                        val.datatype = element.Value;
                 }
+                root.value = val.value;
+                root.datatype = val.datatype.ToString();
+                //root.children[0].value=val.value;
+                //val.datatype = "identifier";
+                return val;
             }
-            //H
-            Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
-            return null;
-            
-            
+            else//H
+            {
+                Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
+                return null;
+            }
+
         }
 
         //Expression → string | Term | Equation
         public static Value_Type handle_Expression(Node root)
         {
             setscope(root);
-            // call when want to get value and data type of expression
             Value_Type val = new Value_Type();
+
+            // call when want to get value and data type of expression
+
 
             if (root.children[0].token.lex == "Term")
             {
@@ -363,37 +359,30 @@ namespace JASON_Compiler
             setscope(root);
             if (root.children[0].token.lex == "Function_Call")
             {
-                val.datatype = handle_function_call(root.children[0]);
+                handle_function_call(root.children[0]);
             }
 
             else if (root.children[0].token.token_type == Token_Class.Identifier)
             {
-                bool check=false;
-                foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
+                if (SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
                 {
-                    if (variable.Key == root.children[0].token.lex)//same variable check scope
-                    {
-                        if (sameScope(variable.Value, root.children[0].scope))
-                        {
-                            val = handle_Identifier(root.children[0]);
-                            check=true;
-                        }
-                    }
+                    //val = handle_Identifier(root);   
+                    val = handle_Identifier(root.children[0]);//H   
                 }
-                if (!check)
+                else
                     Errors.Analyser_Error_List.Add("Variable " + root.children[0].token.lex + " not found");
             }
 
             else if (root.children[0].token.token_type == Token_Class.Number)
             {
-                val.value =int.Parse(root.children[0].token.lex);
+                val.value = int.Parse(root.children[0].token.lex);
                 val.datatype = "int";
-                
+
             }
 
             else if (root.children[0].token.token_type == Token_Class.FloatNumber)
             {
-                val.value = float.Parse( root.children[0].token.lex);
+                val.value = float.Parse(root.children[0].token.lex);
                 val.datatype = "float";
             }
             if (val != null)//H
@@ -410,6 +399,7 @@ namespace JASON_Compiler
             setscope(root);
             List<Value_Type> val = new List<Value_Type>();
             List<Value_Type> val_sorted = new List<Value_Type>();
+            List<Value_Type> temp_val_sorted = new List<Value_Type>();
             Value_Type result = new Value_Type();
             Scanner scan = new Scanner();
             object res = new object();
@@ -422,36 +412,45 @@ namespace JASON_Compiler
                     val.Add(mathterm_list[i]);
             }
 
-            if (root.children[1].token.lex == "Equation'")
+            if (root.children[1] != null && root.children[1].token.lex == "Equation'")
             {
                 List<Value_Type> equ_list = new List<Value_Type>();
-                equ_list = handle_MathTerm(root.children[0]);
+                equ_list = handle_Equationdash(root.children[1]);
                 for (int i = 0; i < equ_list.Count; i++)
                     val.Add(equ_list[i]);
             }
 
-            
+
 
             // check value DataType
             object datatype = val[0].datatype;
-            result.datatype = datatype;
-            for (int i = 0; i < val.Count;)
+            for (int i = 0; i < val.Count; i++)
             {
-                if(val[i].datatype.ToString() == "leftP")
+                if (val[i].datatype.ToString() == "float")
+                    datatype = val[i].datatype;
+            }
+            result.datatype = datatype;
+            #region comment
+            /* for (int i = 0; i < val.Count;)
+            {
+                if (val[i].datatype.ToString() == "leftP" || val[i].datatype.ToString() == "minus" || val[i].datatype.ToString() == "plus" || val[i].datatype.ToString() == "mul" || val[i].datatype.ToString() == "div")
                 {
                     i++;
                 }
-                else if(val[i].datatype.ToString() == "rightP")
+                else if (val[i].datatype.ToString() == "rightP")
                 {
                     i += 2;
                 }
-                else if (val[i].datatype != datatype)
+                else if (val[i].datatype.ToString() != datatype.ToString())
                 {
                     Errors.Analyser_Error_List.Add("Different Datatype");
-                     i += 2;
+                    i += 2;
                 }
+                else
+                    i++;
             }
-               
+           */
+            #endregion
             //------------------------ Calculations
 
             //after calculate each part remove it and replace with the value
@@ -466,21 +465,21 @@ namespace JASON_Compiler
                         val.Remove(val[i]);
                         i++;
                         List<Value_Type> bracket_equ = new List<Value_Type>();
-                        for(int j=i;val[j].datatype.ToString() != "rightP";j++)
+                        for (int j = i; val[j].datatype.ToString() != "rightP"; j++)
                         {
                             bracket_equ.Add(val[j]);
                             val.Remove(val[j]);
                             i++;
                         }
                         val.Remove(val[i]);
-                        Addin_sorted_list(bracket_equ, val_sorted);
-
+                        temp_val_sorted = Addin_sorted_list(bracket_equ, val_sorted);
+                        for (int k = 0; k < temp_val_sorted.Count; k++)
+                            val_sorted.Add(temp_val_sorted[k]);
                     }
                 }
             }
 
-
-            Addin_sorted_list(val, val_sorted);
+            val_sorted = Addin_sorted_list(val, val_sorted);
 
             //-------------------Calculate result
 
@@ -488,107 +487,102 @@ namespace JASON_Compiler
             int num2 = 0;
             float f_num2 = 0;
 
-            
+
             for (int i = 0; i < val_sorted.Count; i++)
             {
                 # region if we have two values Consecutive
-                if (val_sorted[i].datatype.ToString() == "int" || val_sorted[i].datatype.ToString() == "float")
+                if ((val_sorted[i].datatype.ToString() == "int" || val_sorted[i].datatype.ToString() == "float") && (val_sorted[i + 1].datatype.ToString() == "int" || val_sorted[i + 1].datatype.ToString() == "float"))
                 {
-                    if(val_sorted[i+1].datatype.ToString() == "int" || val_sorted[i+1].datatype.ToString() == "float")
+                    if (val_sorted[i + 2].datatype.ToString() == "plus")
                     {
-                        if(val_sorted[i+2].datatype.ToString() == "plus")
+                        if (datatype.ToString() == "int")
+                            res = Convert.ToInt32(val_sorted[i].value) + Convert.ToInt32(val_sorted[i + 1].value);
+                        else if (datatype.ToString() == "float")
+                            res = Convert.ToSingle(val_sorted[i].value) + Convert.ToSingle(val_sorted[i + 1].value);
+
+                        number1.Add(res);
+                        i += 2;
+                    }
+
+                    else if (val_sorted[i + 2].datatype.ToString() == "minus")
+                    {
+                        if (datatype.ToString() == "int")
+                            res = Convert.ToInt32(val_sorted[i].value) - Convert.ToInt32(val_sorted[i + 1].value);
+                        else if (datatype.ToString() == "float")
+                            res = Convert.ToSingle(val_sorted[i].value) - Convert.ToSingle(val_sorted[i + 1].value);
+
+                        number1.Add(res);
+                        i += 2;
+                    }
+
+                    else if (val_sorted[i + 2].datatype.ToString() == "mul")
+                    {
+                        if (datatype.ToString() == "int")
+                            res = Convert.ToInt32(val_sorted[i].value) * Convert.ToInt32(val_sorted[i + 1].value);
+                        else if (datatype.ToString() == "float")
+                            res = Convert.ToSingle(val_sorted[i].value) * Convert.ToSingle(val_sorted[i + 1].value);
+
+                        number1.Add(res);
+                        i += 2;
+                    }
+
+                    else if (val_sorted[i + 2].datatype.ToString() == "div")
+                    {
+                        if (Convert.ToInt32(val_sorted[i + 1].value) == 0)
                         {
-                            if(datatype.ToString() == "int")
-                                 res = Convert.ToInt32(val_sorted[i].value) + Convert.ToInt32(val_sorted[i+1].value);
-                            else if(datatype.ToString() == "float")
-                                 res = (float)val_sorted[i].value + (float)val_sorted[i+1].value;
+                            Errors.Analyser_Error_List.Add("Can't divid by 0");
+                            break;
+                        }
+
+                        else
+                        {
+                            if (datatype.ToString() == "int")
+                                res = Convert.ToInt32(val_sorted[i].value) / Convert.ToInt32(val_sorted[i + 1].value);
+                            else if (datatype.ToString() == "float")
+                                res = Convert.ToSingle(val_sorted[i].value) / Convert.ToSingle(val_sorted[i + 1].value);
 
                             number1.Add(res);
                             i += 2;
-                        }
-
-                        if (val_sorted[i + 2].datatype.ToString() == "minus")
-                        {
-                             if(datatype.ToString() == "int")
-                                 res = Convert.ToInt32(val_sorted[i].value) - Convert.ToInt32(val_sorted[i+1].value);
-                            else if(datatype.ToString() == "float")
-                                 res = (float)val_sorted[i].value - (float)val_sorted[i+1].value;
-                             
-                            number1.Add(res);
-                            i += 2;
-                        }
-
-                        if (val_sorted[i + 2].datatype.ToString() == "mul")
-                        {
-                             if(datatype.ToString() == "int")
-                                 res = Convert.ToInt32(val_sorted[i].value) * Convert.ToInt32(val_sorted[i+1].value);
-                            else if(datatype.ToString() == "float")
-                                 res = (float)val_sorted[i].value * (float)val_sorted[i+1].value;
-                            
-                            number1.Add(res);
-                            i += 2;
-                        }
-
-                        if (val_sorted[i + 2].datatype.ToString() == "div")
-                        {
-                            if (Convert.ToInt32(val_sorted[i - 1].value) == 0)
-                            {
-                                Errors.Analyser_Error_List.Add("Can't divid by 0");
-                                break;
-                            }
-                                
-                            else
-                            {
-                                if (datatype.ToString() == "int")
-                                    res = Convert.ToInt32(val_sorted[i].value) / Convert.ToInt32(val_sorted[i + 1].value);
-                                else if (datatype.ToString() == "float")
-                                    res = (float)val_sorted[i].value / (float)val_sorted[i + 1].value;
-                               
-                                number1.Add(res);
-                                i += 2;
-                            }
-                            
                         }
 
                     }
 
                     num2 = Convert.ToInt32(number1[0]);
-                    f_num2 = (float)number1[0];
+                    f_num2 = Convert.ToSingle(number1[0]);
                 }
-            # endregion
+                # endregion
                 # region if we have value followed by symbol
 
-                else if(val_sorted[i].datatype.ToString() == "int" || val_sorted[i].datatype.ToString() == "float")
+                else if ((val_sorted[i].datatype.ToString() == "int" || val_sorted[i].datatype.ToString() == "float") && scan.Operators.ContainsKey(val_sorted[i + 1].value.ToString()))
                 {
                     if (val_sorted[i + 1].datatype.ToString() == "plus")
                     {
-                        
                         if (datatype.ToString() == "int")
                             num2 += Convert.ToInt32(val_sorted[i].value);
                         else if (datatype.ToString() == "float")
-                            f_num2 += (float)val_sorted[i].value;
+                            f_num2 += Convert.ToSingle(val_sorted[i].value);
                         i++;
                     }
 
-                    if (val_sorted[i + 1].datatype.ToString() == "minus")
+                    else if (val_sorted[i + 1].datatype.ToString() == "minus")
                     {
                         if (datatype.ToString() == "int")
                             num2 -= Convert.ToInt32(val_sorted[i].value);
                         else if (datatype.ToString() == "float")
-                            f_num2 -= (float)val_sorted[i].value;
+                            f_num2 -= Convert.ToSingle(val_sorted[i].value);
                         i++;
                     }
 
-                    if (val_sorted[i + 1].datatype.ToString() == "mul")
+                    else if (val_sorted[i + 1].datatype.ToString() == "mul")
                     {
                         if (datatype.ToString() == "int")
                             num2 *= Convert.ToInt32(val_sorted[i].value);
                         else if (datatype.ToString() == "float")
-                            f_num2 *= (float)val_sorted[i].value;
+                            f_num2 *= Convert.ToSingle(val_sorted[i].value);
                         i++;
                     }
 
-                    if (val_sorted[i + 1].datatype.ToString() == "div")
+                    else if (val_sorted[i + 1].datatype.ToString() == "div")
                     {
                         if (Convert.ToInt32(val_sorted[i].value) == 0)
                         {
@@ -600,33 +594,33 @@ namespace JASON_Compiler
                             if (datatype.ToString() == "int")
                                 num2 /= Convert.ToInt32(val_sorted[i].value);
                             else if (datatype.ToString() == "float")
-                                f_num2 /= (float)val_sorted[i].value;
+                                f_num2 /= Convert.ToSingle(val_sorted[i].value);
                             i++;
                         }
                     }
                 }
                 # endregion
                 #region if we have one symbol
-                else if(val_sorted[i].datatype.ToString() == "plus" || val_sorted[i].datatype.ToString() == "minus" || val_sorted[i].datatype.ToString() == "mul" || val_sorted[i].datatype.ToString() == "div")
+                else if (val_sorted[i].datatype.ToString() == "plus" || val_sorted[i].datatype.ToString() == "minus" || val_sorted[i].datatype.ToString() == "mul" || val_sorted[i].datatype.ToString() == "div")
                 {
                     for (int k = 1; k < number1.Count; k++)
                     {
                         if (val_sorted[i].datatype.ToString() == "plus")
                         {
                             num2 += Convert.ToInt32(number1[k]);
-                            f_num2 += (float)number1[k];
+                            f_num2 += Convert.ToSingle(number1[k]);
                         }
 
                         else if (val_sorted[i].datatype.ToString() == "minus")
                         {
                             num2 -= Convert.ToInt32(number1[k]);
-                            f_num2 -= (float)number1[k];
+                            f_num2 -= Convert.ToSingle(number1[k]);
                         }
 
                         else if (val_sorted[i].datatype.ToString() == "mul")
                         {
                             num2 *= Convert.ToInt32(number1[k]);
-                            f_num2 *= (float)number1[k];
+                            f_num2 *= Convert.ToSingle(number1[k]);
                         }
 
                         else if (val_sorted[i].datatype.ToString() == "div")
@@ -639,12 +633,14 @@ namespace JASON_Compiler
                             else
                             {
                                 num2 /= Convert.ToInt32(number1[k]);
-                                f_num2 /= (float)number1[k];
-                            }                          
+                                f_num2 /= Convert.ToSingle(number1[k]);
+                            }
                         }
+
+                        i++;
                     }
                 }
-#endregion
+                #endregion
             }
 
             if (datatype.ToString() == "int")
@@ -652,11 +648,11 @@ namespace JASON_Compiler
             else if (datatype.ToString() == "float")
                 result.value = f_num2;
 
-                return result;
+            return result;
         }
 
         //Add in sorted list
-        private static void Addin_sorted_list(List<Value_Type> val, List<Value_Type> val_sorted)
+        private static List<Value_Type> Addin_sorted_list(List<Value_Type> val, List<Value_Type> val_sorted)
         {
             Scanner scan = new Scanner();
             bool addition_ch = false;
@@ -671,7 +667,7 @@ namespace JASON_Compiler
                         addition_ch = true;
                     }
 
-                    if (val[i].datatype.ToString() == "mul" || val[i].datatype.ToString() == "div")
+                    else if (val[i].datatype.ToString() == "mul" || val[i].datatype.ToString() == "div")
                     {
                         if (i == 1)
                         {
@@ -679,8 +675,9 @@ namespace JASON_Compiler
                             val_sorted.Add(val[i + 1]);
                             val_sorted.Add(val[i]);
                             val.Remove(val[i - 1]);
-                            val.Remove(val[i + 1]);
-                            val.Remove(val[i]);
+                            val.Remove(val[i - 1]);
+                            val.Remove(val[i - 1]);
+                            i -= 3;
                         }
 
                         else if (addition_ch)
@@ -689,8 +686,9 @@ namespace JASON_Compiler
                             val_sorted.Add(val[i + 1]);
                             val_sorted.Add(val[i]);
                             val.Remove(val[i - 1]);
-                            val.Remove(val[i + 1]);
-                            val.Remove(val[i]);
+                            val.Remove(val[i - 1]);
+                            val.Remove(val[i - 1]);
+                            i -= 3;
                             addition_ch = false;
                         }
 
@@ -698,8 +696,9 @@ namespace JASON_Compiler
                         {
                             val_sorted.Add(val[i + 1]);
                             val_sorted.Add(val[i]);
-                            val.Remove(val[i + 1]);
                             val.Remove(val[i]);
+                            val.Remove(val[i]);
+                            i -= 2;
                         }
                     }
                 }
@@ -707,42 +706,58 @@ namespace JASON_Compiler
 
             //check if op == + || - , make bool two values ----- 4+5*7+8*10 -----> 57*(val1)810*(val2)4+(val3)+
 
-            for (int i = 0; i < val.Count; i += 2)
+            //i += 2 --> i++
+            for (int i = 0; i < val.Count; )
             {
                 if (val[i].datatype.ToString() == "plus" || val[i].datatype.ToString() == "minus")
                 {
-                    if (i == 1 && (val[i+1].datatype.ToString() == "int" || val[i+1].datatype.ToString() == "float"))
+                    if (i == 0 && i == val.Count - 1)
+                    {
+                        val_sorted.Add(val[i]);
+                        val.Remove(val[i]);
+                        i = 0;
+                    }
+                    else if (i == 1 && (val[i + 1].datatype.ToString() == "int" || val[i + 1].datatype.ToString() == "float"))
                     {
                         val_sorted.Add(val[i - 1]);
                         val_sorted.Add(val[i + 1]);
                         val_sorted.Add(val[i]);
                         val.Remove(val[i - 1]);
-                        val.Remove(val[i + 1]);
-                        val.Remove(val[i]);
+                        val.Remove(val[i - 1]);
+                        val.Remove(val[i - 1]);
+                        i = 0;
                     }
-                    else if(val[i+1].datatype.ToString() == "plus" || val[i+1].datatype.ToString() == "minus")
+                    else if (i != 0 && (val[i - 1].datatype.ToString() == "int" || val[i - 1].datatype.ToString() == "float") && (val[i + 1].datatype.ToString() == "plus" || val[i + 1].datatype.ToString() == "minus"))
                     {
                         val_sorted.Add(val[i - 1]);
                         val_sorted.Add(val[i]);
                         val_sorted.Add(val[i + 1]);
                         val.Remove(val[i - 1]);
-                        val.Remove(val[i + 1]);
-                        val.Remove(val[i]);
+                        val.Remove(val[i - 1]);
+                        val.Remove(val[i - 1]);
+                        i = 0;
                     }
-                    else if(i == 0 && i == val.Count - 1)
+
+                    else if (val[i + 1].datatype.ToString() == "int" || val[i + 1].datatype.ToString() == "float")
                     {
+                        val_sorted.Add(val[i + 1]);
                         val_sorted.Add(val[i]);
                         val.Remove(val[i]);
+                        val.Remove(val[i]);
+                        i = 0;
                     }
                     else
                     {
-                        val_sorted.Add(val[i + 1]);
                         val_sorted.Add(val[i]);
-                        val.Remove(val[i - 1]);
                         val.Remove(val[i]);
+                        i = 0;
                     }
                 }
+                else
+                    i++;
             }
+
+            return val_sorted;
         }
 
         //Equation ‘→ Add_op MathTerm Equation ‘| ε  
@@ -757,7 +772,7 @@ namespace JASON_Compiler
             if (root.children[1].token.lex == "MathTerm")
             {
                 List<Value_Type> mathterm_list = new List<Value_Type>();
-                mathterm_list = handle_MathTermdash(root.children[1]);
+                mathterm_list = handle_MathTerm(root.children[1]);
                 for (int i = 0; i < mathterm_list.Count; i++)
                 {
                     val.Add(mathterm_list[i]);
@@ -765,16 +780,13 @@ namespace JASON_Compiler
 
             }
 
-            if (root.children[2].token.lex == "Equation'")
+            if (root.children[2] != null && root.children[2].token.lex == "Equation'")
             {
                 List<Value_Type> equdash_list = new List<Value_Type>();
                 equdash_list = handle_Equationdash(root.children[2]);
                 for (int i = 0; i < equdash_list.Count; i++)
                     val.Add(equdash_list[i]);
             }
-
-            else
-                return null;
 
             return val;
         }
@@ -790,7 +802,7 @@ namespace JASON_Compiler
                 val.value = '+';
                 val.datatype = "plus";
             }
-                
+
             else if (root.children[0].token.token_type == Token_Class.MinusOp)
             {
                 val.value = '-';
@@ -863,14 +875,14 @@ namespace JASON_Compiler
             if (root.children[1].token.lex == "Factor")
             {
                 List<Value_Type> factor_list = new List<Value_Type>();
-                factor_list = handle_Factor(root.children[2]);
+                factor_list = handle_Factor(root.children[1]);
                 for (int i = 0; i < factor_list.Count; i++)
                 {
                     val.Add(factor_list[i]);
                 }
             }
 
-            if (root.children[2].token.lex == "MathTerm'")
+            if (root.children[2] != null && root.children[2].token.lex == "MathTerm'")
             {
                 List<Value_Type> mathterm_list = new List<Value_Type>();
                 mathterm_list = handle_MathTermdash(root.children[2]);
@@ -881,13 +893,10 @@ namespace JASON_Compiler
 
             }
 
-            else
-                return null;
-
             return val;
         }
 
-        //Factor → (Equation) | number  
+        //Factor → (Equation) | Term  
         public static List<Value_Type> handle_Factor(Node root)
         {
             setscope(root);
@@ -925,20 +934,7 @@ namespace JASON_Compiler
         public static void handle_Assignment_statement(Node root)
         {
             setscope(root);
-            bool variable_Found=false;
-            List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
-            {
-                if (variable.Key == root.children[0].token.lex)//same variable check scope
-                {
-                    if (sameScope(variable.Value, root.children[0].scope))
-                    {
-                        variable_Found=true;
-                        attributes = SymbolTable[variable];
-                    }
-                }
-            }
-            if (!variable_Found)
+            if (!SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
             {
                 //Errors.Analyser_Error_List.Add("Variable not found");
                 Errors.Analyser_Error_List.Add(root.children[0].token.lex + " Variable not found (undeclared)");//H
@@ -946,6 +942,8 @@ namespace JASON_Compiler
             else//H
             {
                 KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
+                List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
+                attributes = SymbolTable[list_key];
                 Value_Type returned_Exp = handle_Expression(root.children[2]);//H
                 var set_val = new KeyValuePair<string, object>("Value", returned_Exp.value);
                 bool novalue = true;//H
@@ -958,20 +956,13 @@ namespace JASON_Compiler
                     }
                     if (attributes[i].Key == "Datatype")
                     {
-                        if (returned_Exp.datatype != null)
+                        if ((attributes[i].Value.ToString().ToLower()) != (returned_Exp.datatype.ToString().ToLower()))
                         {
-                            if ((attributes[i].Value.ToString().ToLower()) != (returned_Exp.datatype.ToString().ToLower()))
-                            {
-                                Errors.Analyser_Error_List.Add("Datatype of assigned value and variable are different");
-                            }
-                        }
-                        else
-                        {
-                            Errors.Analyser_Error_List.Add("Datatype of assigned value is null");
+                            Errors.Analyser_Error_List.Add("Datatype of assigned value and variable are different");
                         }
                     }
                 }
-                if (novalue && set_val.Value!=null)//H
+                if (novalue)//H
                 {
                     attributes.Add(set_val);
                 }
@@ -987,7 +978,7 @@ namespace JASON_Compiler
             setscope(root);
             Value_Type val = new Value_Type();
 
-            if(root.children[0].token.token_type == Token_Class.AssignmentOp)
+            if (root.children[0].token.token_type == Token_Class.AssignmentOp)
                 val.value = ":=";
 
             return val;

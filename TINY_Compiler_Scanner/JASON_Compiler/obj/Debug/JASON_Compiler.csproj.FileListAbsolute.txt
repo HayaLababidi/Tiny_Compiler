@@ -156,3 +156,4 @@ D:\Redirected Profile\Documents\projects\git\Tiny_Compiler\TINY_Compiler_Scanner
 D:\Redirected Profile\Documents\projects\git\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.Properties.Resources.resources
 D:\Redirected Profile\Documents\projects\git\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.SemanticAnalyserForm.resources
 D:\Redirected Profile\Documents\projects\git\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csproj.GenerateResource.Cache
+E:\year4_1\Compilers\Tasks\Task 1 (Scanner)\Tiny_Compiler\TINY_Compiler_Scanner\JASON_Compiler\obj\Debug\JASON_Compiler.csprojResolveAssemblyReference.cache
