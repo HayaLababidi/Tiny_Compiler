@@ -415,7 +415,7 @@ namespace JASON_Compiler
             setscope(root);
             if (root.children[0].token.lex == "Function_Call")
             {
-                val.datatype = handle_function_call(root.children[0]);
+                val = handle_function_call(root.children[0]);
             }
 
             else if (root.children[0].token.token_type == Token_Class.Identifier)
@@ -483,7 +483,7 @@ namespace JASON_Compiler
                     val.Add(equ_list[i]);
             }
 
-            if(root.scope != "main")
+            if(!sameScope("main", root.scope))
             {
                 result.datatype = val[0].datatype;
                 result.value = null;
@@ -704,8 +704,8 @@ namespace JASON_Compiler
                                 f_num2 /= Convert.ToSingle(number1[k]);
                             }
                         }
-                        //else
-                            //k--;
+                        else
+                            k--;
                         i++;
                     }
                 }
@@ -1477,7 +1477,7 @@ namespace JASON_Compiler
             param = new KeyValuePair<string, string>(root.children[2].token.lex, root.children[2].datatype);
             return param;
         }
-        public static string handle_function_call(Node root)
+        public static Value_Type handle_function_call(Node root)
         {
             setscope(root);
             matchParameters matchparam;
@@ -1543,8 +1543,18 @@ namespace JASON_Compiler
             //else1 function name not exist in function table
             else
                 Errors.Analyser_Error_List.Add(funName + " Is Undeclared function");
-
-            return funTableValue.datatype;
+            object temp;
+            if (funTableValue.datatype.ToString() == "int")
+                temp=0;
+            else if (funTableValue.datatype.ToString() == "float")
+                temp=0.0;
+            else
+                temp=" ";
+           
+            Value_Type v= new Value_Type();
+            v.datatype = funTableValue.datatype;
+            v.value=temp;
+            return v;
         }
         public static List<Value_Type> handle_argument_list(Node root)
         {
