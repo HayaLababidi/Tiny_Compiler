@@ -144,7 +144,7 @@ namespace JASON_Compiler
             }
             else if (root.children[0].children[0].token.lex.ToLower() == "read_statement")
             {
-                //read_statement
+                handle_read(root.children[0].children[0]);
             }
             else if (root.children[0].children[0].token.lex.ToLower() == "if_statement")
             {
@@ -289,6 +289,59 @@ namespace JASON_Compiler
             }
         }
 
+        public static void handle_read(Node root)
+        {
+            setscope(root);
+            Value_Type val = new Value_Type();
+            KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[1].token.lex, root.children[1].scope);//H
+            List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
+            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
+            {
+                if (variable.Key == list_key.Key)//same variable check scope
+                {
+                    if (sameScope(variable.Value, list_key.Value))
+                    {
+                        attributes = SymbolTable[variable];
+                        foreach (KeyValuePair<string, object> element in attributes)
+                        {
+                            if (element.Key == "Datatype")
+                                val.datatype = element.Value;
+                        }
+                        int i;
+                        bool v = false;
+                        for (i = 0; i < attributes.Count; i++)
+                        {
+                            if (attributes[i].Key == "Value")
+                            {
+                                if (val.datatype == "int")
+                                    attributes[i]=new KeyValuePair<string,object>("Value",0);
+                                else if(val.datatype =="float")
+                                    attributes[i] = new KeyValuePair<string, object>("Value", 0.0);
+                                else if (val.datatype == "string")
+                                    attributes[i] = new KeyValuePair<string, object>("Value", " ");
+                                v = true;
+                            }
+                        }
+                        if (!v)
+                        {
+                            if (val.datatype.ToString() == "int")
+                                attributes.Add( new KeyValuePair<string, object>("Value", 0));
+                            else if (val.datatype.ToString() == "float")
+                                attributes.Add(new KeyValuePair<string, object>("Value", 0.0));
+                            else if (val.datatype.ToString() == "string")
+                                attributes.Add(new KeyValuePair<string, object>("Value", " "));
+                        }
+                        root.value = val.value;
+                        root.datatype = val.datatype.ToString();
+                        //root.children[0].value=val.value;
+                        //val.datatype = "identifier";
+                    }
+                }
+            }
+            //H
+            Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
+
+        }
         //endP1
 # endregion
 
@@ -651,7 +704,8 @@ namespace JASON_Compiler
                                 f_num2 /= Convert.ToSingle(number1[k]);
                             }
                         }
-
+                        //else
+                            //k--;
                         i++;
                     }
                 }
@@ -969,6 +1023,7 @@ namespace JASON_Compiler
             }
             else//H
             {
+
                 KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
                 Value_Type returned_Exp = handle_Expression(root.children[2]);//H
                 var set_val = new KeyValuePair<string, object>("Value", returned_Exp.value);
