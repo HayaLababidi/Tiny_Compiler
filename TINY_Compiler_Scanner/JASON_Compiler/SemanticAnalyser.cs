@@ -300,28 +300,31 @@ namespace JASON_Compiler
             //KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
             KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.token.lex, root.scope);//H
             List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-            if (SymbolTable.ContainsKey(list_key))//H //make sure key exist
+            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
             {
-                attributes = SymbolTable[list_key];
-                foreach (KeyValuePair<string, object> element in attributes)
+                if (variable.Key == list_key.Key)//same variable check scope
                 {
-                    if (element.Key == "Value")
-                        val.value = element.Value;
-                    if (element.Key == "Datatype")
-                        val.datatype = element.Value;
+                    if (sameScope(variable.Value, list_key.Value))
+                    {
+                        attributes = SymbolTable[variable];
+                        foreach (KeyValuePair<string, object> element in attributes)
+                        {
+                            if (element.Key == "Value")
+                                val.value = element.Value;
+                            if (element.Key == "Datatype")
+                                val.datatype = element.Value;
+                        }
+                        root.value = val.value;
+                        root.datatype = val.datatype.ToString();
+                        //root.children[0].value=val.value;
+                        //val.datatype = "identifier";
+                        return val;
+                    }
                 }
-                root.value = val.value;
-                root.datatype = val.datatype.ToString();
-                //root.children[0].value=val.value;
-                //val.datatype = "identifier";
-                return val;
             }
-            else//H
-            {
-                Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
-                return null;
-            }
-
+            //H
+            Errors.Analyser_Error_List.Add("Use of undeclared variable \" " + list_key.Key + "\"");
+            return null;
         }
 
         //Expression → string | Term | Equation
@@ -359,17 +362,24 @@ namespace JASON_Compiler
             setscope(root);
             if (root.children[0].token.lex == "Function_Call")
             {
-                handle_function_call(root.children[0]);
+                val.datatype = handle_function_call(root.children[0]);
             }
 
             else if (root.children[0].token.token_type == Token_Class.Identifier)
             {
-                if (SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
+                bool check=false;
+                foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
                 {
-                    //val = handle_Identifier(root);   
-                    val = handle_Identifier(root.children[0]);//H   
+                    if (variable.Key == root.children[0].token.lex)//same variable check scope
+                    {
+                        if (sameScope(variable.Value, root.children[0].scope))
+                        {
+                            val = handle_Identifier(root.children[0]);
+                            check=true;
+                        }
+                    }   
                 }
-                else
+                if (!check)
                     Errors.Analyser_Error_List.Add("Variable " + root.children[0].token.lex + " not found");
             }
 
@@ -939,7 +949,20 @@ namespace JASON_Compiler
         public static void handle_Assignment_statement(Node root)
         {
             setscope(root);
-            if (!SymbolTable.ContainsKey(new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope)))
+            bool variable_Found=false;
+            List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
+            foreach (KeyValuePair<string, string> variable in SymbolTable.Keys)//H
+            {
+                if (variable.Key == root.children[0].token.lex)//same variable check scope
+                {
+                    if (sameScope(variable.Value, root.children[0].scope))
+                    {
+                        variable_Found=true;
+                        attributes = SymbolTable[variable];
+                    }
+                }
+            }
+            if (!variable_Found)
             {
                 //Errors.Analyser_Error_List.Add("Variable not found");
                 Errors.Analyser_Error_List.Add(root.children[0].token.lex + " Variable not found (undeclared)");//H
@@ -947,8 +970,6 @@ namespace JASON_Compiler
             else//H
             {
                 KeyValuePair<string, string> list_key = new KeyValuePair<string, string>(root.children[0].token.lex, root.children[0].scope);
-                List<KeyValuePair<string, object>> attributes = new List<KeyValuePair<string, object>>();
-                attributes = SymbolTable[list_key];
                 Value_Type returned_Exp = handle_Expression(root.children[2]);//H
                 var set_val = new KeyValuePair<string, object>("Value", returned_Exp.value);
                 bool novalue = true;//H
@@ -961,13 +982,18 @@ namespace JASON_Compiler
                     }
                     if (attributes[i].Key == "Datatype")
                     {
-                        if ((attributes[i].Value.ToString().ToLower()) != (returned_Exp.datatype.ToString().ToLower()))
+                         if (returned_Exp.datatype != null)
                         {
-                            Errors.Analyser_Error_List.Add("Datatype of assigned value and variable are different");
+                            if ((attributes[i].Value.ToString().ToLower()) != (returned_Exp.datatype.ToString().ToLower()))
+                            {
+                                Errors.Analyser_Error_List.Add("Datatype of assigned value and variable are different");
+                            }
+                        }
+                        else
+                           Errors.Analyser_Error_List.Add("Datatype of assigned value is null");
                         }
                     }
-                }
-                if (novalue)//H
+                if (novalue && set_val.Value!=null)//H
                 {
                     attributes.Add(set_val);
                 }
@@ -1398,6 +1424,7 @@ namespace JASON_Compiler
         }
         public static string handle_function_call(Node root)
         {
+            setscope(root);
             matchParameters matchparam;
             matchparam.dataTypeOFArguments = true;
             matchparam.numOFArguments =true;
@@ -1466,6 +1493,7 @@ namespace JASON_Compiler
         }
         public static List<Value_Type> handle_argument_list(Node root)
         {
+            setscope(root);
             List<Value_Type> dataTypeParams = new List<Value_Type>();
             List<Value_Type> paramType = new List<Value_Type>();
             paramType.Add( handle_Expression(root.children[0]));
@@ -1480,6 +1508,7 @@ namespace JASON_Compiler
         }
         public static List<Value_Type> handle_arguments(Node root)
         {
+            setscope(root);
             List<Value_Type> paramType = new List<Value_Type>();
             if (root.children[2] != null)
             {
