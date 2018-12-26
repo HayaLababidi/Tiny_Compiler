@@ -420,7 +420,12 @@ namespace JASON_Compiler
                     val.Add(equ_list[i]);
             }
 
-
+            if(root.scope != "main")
+            {
+                result.datatype = val[0].datatype;
+                result.value = null;
+                return result;
+            }
 
             // check value DataType
             object datatype = val[0].datatype;
