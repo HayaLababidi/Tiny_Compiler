@@ -958,9 +958,16 @@ namespace JASON_Compiler
                     }
                     if (attributes[i].Key == "Datatype")
                     {
-                        if ((attributes[i].Value.ToString().ToLower()) != (returned_Exp.datatype.ToString().ToLower()))
+                        if (returned_Exp.datatype != null)
                         {
-                            Errors.Analyser_Error_List.Add("Datatype of assigned value and variable are different");
+                            if ((attributes[i].Value.ToString().ToLower()) != (returned_Exp.datatype.ToString().ToLower()))
+                            {
+                                Errors.Analyser_Error_List.Add("Datatype of assigned value and variable are different");
+                            }
+                        }
+                        else
+                        {
+                            Errors.Analyser_Error_List.Add("Datatype of assigned value is null");
                         }
                     }
                 }
@@ -1437,7 +1444,6 @@ namespace JASON_Compiler
                    }
                    //else3 the num of arguments not equal num of parameters
                    else
-
                        matchparam.numOFArguments = false;
                }
                //else2 num of arguments  is zero and check if num of parameters equal zero
@@ -1465,25 +1471,25 @@ namespace JASON_Compiler
         public static List<Value_Type> handle_argument_list(Node root)
         {
             List<Value_Type> dataTypeParams = new List<Value_Type>();
-            Value_Type paramType = new Value_Type();
-            paramType = handle_Expression(root.children[0]);
-            dataTypeParams.Add(paramType);
+            List<Value_Type> paramType = new List<Value_Type>();
+            paramType.Add( handle_Expression(root.children[0]));
+            dataTypeParams.Concat(paramType);
             if (root.children[1] != null)
             {
                 paramType = handle_arguments(root.children[1]);
-                dataTypeParams.Add(paramType);
+                dataTypeParams.Concat(paramType);
             }
 
             return dataTypeParams;
         }
-        public static Value_Type handle_arguments(Node root)
+        public static List<Value_Type> handle_arguments(Node root)
         {
+            List<Value_Type> paramType = new List<Value_Type>();
             if (root.children[2] != null)
             {
-                handle_arguments(root.children[2]);
+                paramType = handle_arguments(root.children[2]);
             }
-            Value_Type paramType = new Value_Type();
-            paramType = handle_Expression(root.children[1]);
+            paramType.Add(handle_Expression(root.children[1]));
             return paramType;
         }
         # endregion
